@@ -43,7 +43,7 @@ public class LogIn extends JFrame {
         setMinimumSize(new Dimension(520, 400));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
-                Objects.requireNonNull(getClass().getResource("/images/Ripplelogo.png"))));
+                Objects.requireNonNull(getClass().getResource("/images/logo.png"))));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -99,7 +99,7 @@ public class LogIn extends JFrame {
         constraints.gridwidth = 1;
         try {
             // Cargar la imagen desde el archivo "user.png" en la carpeta "resources"
-            ImageIcon originalIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/logIn/user.png")));
+            ImageIcon originalIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/Core/user.png")));
 
             // Escalar la imagen al tamaño deseado (por ejemplo, 50x50 píxeles)
             int width = 30;
@@ -143,7 +143,7 @@ public class LogIn extends JFrame {
 
         try {
             // Cargar la imagen desde el archivo "password.png" en la carpeta "resources"
-            ImageIcon originalPasswordIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/logIn/lock.png")));
+            ImageIcon originalPasswordIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/Core/lock.png")));
 
             // Escalar la imagen al tamaño deseado (por ejemplo, 50x50 píxeles)
             int width = 30;
@@ -189,6 +189,12 @@ public class LogIn extends JFrame {
             }
         });
         logInPanel.add(registerButton, constraints);
+
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
 
         return logInPanel;
     }
