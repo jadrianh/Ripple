@@ -157,6 +157,20 @@ public class LogIn extends JFrame {
         }
 
         JButton loginButton = new JButton("Login");
+        
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Oculta el formulario LogIn
+                setVisible(false);
+
+                // Crea una instancia del formulario Home
+                Home homeForm = new Home();
+                // Muestra el formulario Home
+                homeForm.setVisible(true);
+            }
+        });
+        
         loginButton.setPreferredSize(new Dimension(250, 35));
         loginButton.setBackground(Color.decode("#00A7F8"));
         loginButton.setFont(new Font("Arial", Font.PLAIN, 18));

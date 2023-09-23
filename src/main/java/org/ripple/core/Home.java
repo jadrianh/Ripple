@@ -104,7 +104,7 @@ public class Home extends JFrame {
     private void initializeUI() {
         //--------------Configuracion principal--------------//
         setTitle("Ripple");
-        setSize(520, 980);
+        setSize(520, 740);
         setMinimumSize(new Dimension(520, 400));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
@@ -148,6 +148,9 @@ public class Home extends JFrame {
                 }
             }
         });
+        
+        
+        
 
         // Espacio vacío para separar el botón de menú de los otros elementos
         Component rigidArea = Box.createRigidArea(new Dimension(10, 40)); // Ajusta el valor para controlar la separación
