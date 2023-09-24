@@ -143,7 +143,7 @@ public class Home extends JFrame {
 
     private void initializeUI() {
         setTitle("Ripple");
-        setSize(520, 740);
+        setSize(520, 980);
         setMinimumSize(new Dimension(520, 400));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
