@@ -6,10 +6,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Objects;
+import java.awt.geom.Ellipse2D;
 
 class RoundedPanel extends JPanel {
-    private int arc;
+    private final int arc;
 
     public RoundedPanel(int arc) {
         this.arc = arc;
@@ -25,40 +25,76 @@ class RoundedPanel extends JPanel {
         Graphics2D graphics = (Graphics2D) g;
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Fondo blanco
         graphics.setColor(Color.WHITE);
         graphics.fillRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
     }
 }
 
-class MenuDesplegable extends JPanel {
+class CircularButton extends JButton {
 
-    public MenuDesplegable() {
-        setBackground(new Color(0, 99, 183));
-        setLayout(new BorderLayout());
+    private static final int BUTTON_SIZE = 50; // Adjust the button size as needed
 
-        // Icono de la aplicación en el menú desplegable (ajustado a 64x64)
-        ImageIcon appIconMenu = new ImageIcon(getClass().getResource("/images/logo.png"));
-        Image appImageMenu = appIconMenu.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+    public CircularButton(Icon icon) {
+        setIcon(icon);
+        setContentAreaFilled(false);
+        setBorderPainted(false);
+        setFocusable(false);
+        setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE)); // Set the button size
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(Color.WHITE);
+        g2.fill(new Ellipse2D.Double(0, 0, getWidth() - 1, getHeight() - 1));
+        super.paintComponent(g2);
+        g2.dispose();
+    }
+}
+
+class SideMenu extends JLayeredPane {
+    private boolean menuVisible = false;
+    private SideMenu sideMenu;
+
+    public boolean isMenuVisible() {
+        return menuVisible;
+    }
+
+    public void setMenuVisible(boolean menuVisible) {
+        this.menuVisible = menuVisible;
+        firePropertyChange("menuVisible", !menuVisible, menuVisible);
+    }
+
+    public SideMenu getMenuDesplegable() {
+        return sideMenu;
+    }
+
+    public void setMenuDesplegable(SideMenu sideMenu) {
+        this.sideMenu = sideMenu;
+    }
+
+    public SideMenu() {
+        setLocation(0, 0);
+        setOpaque(true);
+        setBackground(new Color(255, 255, 255));
+
+        ImageIcon appIconMenu = new ImageIcon(getClass().getResource("/images/ripple.png"));
+        Image appImageMenu = appIconMenu.getImage().getScaledInstance(140, 36, Image.SCALE_SMOOTH);
         appIconMenu = new ImageIcon(appImageMenu);
         JLabel appLabelMenu = new JLabel(appIconMenu);
         appLabelMenu.setHorizontalAlignment(SwingConstants.CENTER);
-        add(appLabelMenu, BorderLayout.NORTH);
 
-        // Panel de botones de navegación
-        JPanel navPanel = new JPanel();
-        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.Y_AXIS));
-        navPanel.setOpaque(false);
+        appLabelMenu.setBounds(0, 10, 180, 34);
+        add(appLabelMenu, Integer.valueOf(1));
 
-        // Botones de navegación
-        String[] buttonInfo = {"/images/Core/home.png", "Home", "/images/Core/user.png", "Perfil", "/images/Core/log-out.png", "Logout"};
+        String[] buttonInfo = {"/images/Core/home.png", "Home", "/images/Core/user.png", "Perfil", "/images/Core/hash.png", "Eventos", "/images/Core/sliders.png", "Ajustes", "/images/Core/log-out.png", "Logout"};
 
         for (int i = 0; i < buttonInfo.length; i += 2) {
             JButton button = createNavButton(buttonInfo[i], buttonInfo[i + 1]);
-            navPanel.add(button);
+            button.setBounds(-30, 80 + i * 45, 180, 45);
+            add(button, Integer.valueOf(2));
         }
-
-        add(navPanel, BorderLayout.WEST);
     }
 
     private JButton createNavButton(String iconPath, String label) {
@@ -70,31 +106,35 @@ class MenuDesplegable extends JPanel {
 
         ImageIcon icon = new ImageIcon(getClass().getResource(iconPath));
         icon = new ImageIcon(icon.getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH));
-        button.setIcon(icon);
+        Font font = new Font("Roboto", Font.PLAIN, 20);
 
         JLabel labelComponent = new JLabel(label);
-        labelComponent.setForeground(Color.WHITE);
-        labelComponent.setHorizontalAlignment(SwingConstants.CENTER);
+        labelComponent.setFont(font);
+        labelComponent.setForeground(Color.decode("#00AAFF"));
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.add(new JLabel(icon));
+        buttonPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        buttonPanel.add(labelComponent);
+
+        button.add(buttonPanel);
 
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Agregar lógica para manejar la acción del botón aquí
             }
         });
-
-        // Agregar el label al botón
-        button.setLayout(new BorderLayout());
-        button.add(labelComponent, BorderLayout.SOUTH);
 
         return button;
     }
 }
 
 public class Home extends JFrame {
-    Desface desplace;
+    private Desface desplace;
     private boolean menuVisible = false;
-    private MenuDesplegable menuDesplegable;
+    private SideMenu sideMenu;
 
     public Home() {
         initializeUI();
@@ -102,14 +142,14 @@ public class Home extends JFrame {
     }
 
     private void initializeUI() {
-        //--------------Configuracion principal--------------//
         setTitle("Ripple");
         setSize(520, 980);
         setMinimumSize(new Dimension(520, 400));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
-                Objects.requireNonNull(getClass().getResource("/images/logo.png"))));
+                getClass().getResource("/images/logo.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //setResizable(false);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel() {
@@ -128,83 +168,80 @@ public class Home extends JFrame {
             }
         };
 
-        // Crear el botón de menú con el icono
-        JButton menuButton = new JButton(new ImageIcon(Objects.requireNonNull(getClass().getResource("/images/Core/menu.png"))));
+        JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/menu.png")));
         menuButton.setPreferredSize(new Dimension(40, 40));
         menuButton.setContentAreaFilled(false);
         menuButton.setBorderPainted(false);
         menuButton.setFocusable(false);
+        menuButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         menuButton.setMargin(new Insets(5, 5, 5, 5));
 
         menuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!menuVisible) {
-                    desplace.desplazarIzquierda(menuDesplegable, menuDesplegable.getX(), -240, 10, 4);
+                    desplace.desplazarIzquierda(sideMenu, sideMenu.getX(), -180, 10, 5);
                     menuVisible = true;
                 } else {
-                    desplace.desplazarDerecha(menuDesplegable, menuDesplegable.getX(), 0, 10, 4);
+                    desplace.desplazarDerecha(sideMenu, sideMenu.getX(), 0, 10, 5);
                     menuVisible = false;
                 }
             }
         });
 
-        // Espacio vacío para separar el botón de menú de los otros elementos
-        Component rigidArea = Box.createRigidArea(new Dimension(10, 40)); // Ajusta el valor para controlar la separación
-
-        // Crear el botón de búsqueda con el icono de lupa y tamaño de 40x40
-        JButton searchButton = new JButton(new ImageIcon(Objects.requireNonNull(getClass().getResource("/images/Core/search.png"))));
+        JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/search.png")));
         searchButton.setPreferredSize(new Dimension(40, 40));
         searchButton.setContentAreaFilled(false);
         searchButton.setBorderPainted(false);
         searchButton.setFocusable(false);
+        searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Crear un panel redondeado para la barra de búsqueda con bordes más redondeados
-        RoundedPanel searchPanel = new RoundedPanel(42); // Redondeo extremo
-        searchPanel.setPreferredSize(new Dimension(330, 12)); // Tamaño del panel (mínimo 40px de alto)
+        RoundedPanel searchPanel = new RoundedPanel(42);
+        searchPanel.setPreferredSize(new Dimension(330, 30));
 
-        // Crear la barra de búsqueda y configurarla
         JTextField searchBar = new JTextField();
         searchBar.setOpaque(false);
-        searchBar.setBorder(BorderFactory.createEmptyBorder()); // Sin borde
-        searchBar.setPreferredSize(new Dimension(310, 30));
-        searchBar.setForeground(Color.GRAY); // Color de texto gris
-        searchBar.setCaretColor(Color.GRAY); // Color del cursor gris
+        searchBar.setBorder(BorderFactory.createEmptyBorder());
+        searchBar.setPreferredSize(new Dimension(300, 30));
+        searchBar.setForeground(Color.decode("#C0C0C0"));
+        searchBar.setCaretColor(Color.decode("#C0C0C0"));
 
-        // Configurar la fuente a Arial 12
-        Font font = new Font("Arial", Font.PLAIN, 15);
+        Font font = new Font("Verdana", Font.PLAIN, 18);
         searchBar.setFont(font);
 
-        // Agregar ActionListener para el botón de búsqueda
+        searchPanel.add(searchBar, BorderLayout.CENTER);
+
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Agregar aquí la lógica para realizar la búsqueda
-                // Por ejemplo, obtener el texto ingresado en searchBar.getText()
+                String searchText = searchBar.getText();
+                // Implement your search logic here using the 'searchText'
+                // For example, display a message with the search text:
+                JOptionPane.showMessageDialog(Home.this, "Searching for: " + searchText);
             }
         });
 
-        // Agregar la barra de búsqueda al panel redondeado
-        searchPanel.add(searchBar);
+        Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/user-plus.png"));
+        CircularButton addButton = new CircularButton(addButtonIcon);
 
-        // Agregar el menu a la ventana principal
-        menuDesplegable = new MenuDesplegable();
-        menuDesplegable.setPreferredSize(new Dimension(80, getHeight()));
-        menuDesplegable.setLocation(0, 0);
-        mainPanel.add(menuDesplegable, BorderLayout.WEST);
+        addButton.setBounds(400, 840, 80, 80);
+        addButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Crear un panel para contener los elementos de la parte superior
+        getLayeredPane().add(addButton, JLayeredPane.PALETTE_LAYER);
+
+
+        sideMenu = new SideMenu();
+        sideMenu.setBounds(0, 0, 180, getHeight());
+
+        getLayeredPane().add(sideMenu, JLayeredPane.PALETTE_LAYER);
+
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
-        topPanel.add(menuButton, BorderLayout.WEST); // Agregar botón de menú
-        topPanel.add(searchButton, BorderLayout.CENTER); // Agregar botón de búsqueda
-        topPanel.add(searchPanel, BorderLayout.EAST); // Agregar panel de búsqueda
+        topPanel.add(menuButton, BorderLayout.WEST);
+        topPanel.add(searchButton, BorderLayout.CENTER);
+        topPanel.add(searchPanel, BorderLayout.EAST);
 
-        // Agregar el panel superior a la ventana principal
         mainPanel.add(topPanel, BorderLayout.NORTH);
-
-        // Establecer el z-order del menú desplegable para que esté en la parte superior
-        mainPanel.setComponentZOrder(menuDesplegable, 0);
 
         getContentPane().add(mainPanel);
         setVisible(true);
