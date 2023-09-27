@@ -143,7 +143,7 @@ public class Home extends JFrame {
 
     private void initializeUI() {
         setTitle("Ripple");
-        setSize(520, 980);
+        setSize(320, 740);
         setMinimumSize(new Dimension(520, 400));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
@@ -227,10 +227,17 @@ public class Home extends JFrame {
         Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/user-plus.png"));
         CircularButton addButton = new CircularButton(addButtonIcon);
 
-        addButton.setBounds(400, 840, 80, 80);
+        addButton.setBounds(400, 610, 80, 80);
         addButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         getLayeredPane().add(addButton, JLayeredPane.PALETTE_LAYER);
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                GestionContactos.main(new String[0]);
+            }
+        });
 
 
         sideMenu = new SideMenu();
