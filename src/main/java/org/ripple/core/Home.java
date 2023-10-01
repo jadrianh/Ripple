@@ -238,6 +238,8 @@ public class Home extends JFrame {
                 GestionContactos.main(new String[0]);
             }
         });
+        
+        
 
 
         sideMenu = new SideMenu();
