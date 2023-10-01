@@ -14,17 +14,16 @@ import javax.swing.JOptionPane;
  */
 public class CConexion {
     Connection conection = null;
-    String usuario = "Ripple";
-    String contrasena = "RippleCode";
+    String usuario = "root";
+    String contrasena = "RooT1";
     String bd = "agendaDB";
     String ip = "localhost";
-    String puerto = "1433";
+    String puerto = "3306";
     
-    String cadena = "jdbc:sqlserver://" + ip + ":" + puerto + "/" + bd;
+    String cadena = "jdbc:mysql://" + ip + ":" + puerto + "/" + bd;
     
     public Connection establecerConection(){
         try{
-            String cadena = "jdbc:sqlserver://localhost:" + puerto + ":" + "databaseName = " + bd;
             conection = (Connection) DriverManager.getConnection(cadena, usuario, contrasena);
             JOptionPane.showMessageDialog(null, "Se conectó correctamente a la Base de Datos");
         }catch(Exception e){
@@ -33,5 +32,4 @@ public class CConexion {
         
         return conection;
     }
-    
 }
