@@ -204,9 +204,16 @@ public class LogIn extends JFrame {
         });
         logInPanel.add(registerButton, constraints);
 
-        loginButton.addActionListener(new ActionListener() {
+        registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Oculta el formulario LogIn
+                setVisible(false);
+
+                // Crea una instancia del formulario RegistroVentana
+                Registro registroForm = new Registro();
+                // Muestra el formulario de registro
+                registroForm.setVisible(true);
             }
         });
 
