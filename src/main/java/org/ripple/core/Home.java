@@ -6,8 +6,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.Ellipse2D;
 
+// Clase para crear un panel con esquinas redondeadas
 class RoundedPanel extends JPanel {
     private final int arc;
 
@@ -30,16 +33,17 @@ class RoundedPanel extends JPanel {
     }
 }
 
+// Clase para crear un botón circular
 class CircularButton extends JButton {
 
-    private static final int BUTTON_SIZE = 50; // Adjust the button size as needed
+    private static final int BUTTON_SIZE = 50;
 
     public CircularButton(Icon icon) {
         setIcon(icon);
         setContentAreaFilled(false);
         setBorderPainted(false);
         setFocusable(false);
-        setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE)); // Set the button size
+        setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
     }
 
     @Override
@@ -53,6 +57,7 @@ class CircularButton extends JButton {
     }
 }
 
+// Clase para el menú lateral
 class SideMenu extends JLayeredPane {
     private boolean menuVisible = false;
     private SideMenu sideMenu;
@@ -88,6 +93,7 @@ class SideMenu extends JLayeredPane {
         appLabelMenu.setBounds(0, 10, 180, 34);
         add(appLabelMenu, Integer.valueOf(1));
 
+        // Información de los botones del menú
         String[] buttonInfo = {"/images/Core/home.png", "Home", "/images/Core/user.png", "Perfil", "/images/Core/hash.png", "Eventos", "/images/Core/sliders.png", "Ajustes", "/images/Core/log-out.png", "Logout"};
 
         for (int i = 0; i < buttonInfo.length; i += 2) {
@@ -97,6 +103,7 @@ class SideMenu extends JLayeredPane {
         }
     }
 
+    // Método para crear un botón de navegación
     private JButton createNavButton(String iconPath, String label) {
         JButton button = new JButton();
         button.setOpaque(false);
@@ -124,6 +131,7 @@ class SideMenu extends JLayeredPane {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Acciones al hacer clic en el botón
             }
         });
 
@@ -131,6 +139,7 @@ class SideMenu extends JLayeredPane {
     }
 }
 
+// Clase principal de la aplicación
 public class Home extends JFrame {
     private Desface desplace;
     private boolean menuVisible = false;
@@ -143,15 +152,28 @@ public class Home extends JFrame {
 
     private void initializeUI() {
         setTitle("Ripple");
-        setSize(320, 740);
         setMinimumSize(new Dimension(520, 400));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 getClass().getResource("/images/logo.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //setResizable(false);
+
+        // Configuración del tamaño de la ventana
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        DisplayMode mode = gd.getDisplayMode();
+
+        int screenWidth = mode.getWidth();
+        int screenHeight = mode.getHeight();
+        int smallerDimension = Math.min(screenWidth, screenHeight);
+
+        int newWidth = smallerDimension * 520 / 980;
+        int newHeight = smallerDimension;
+
+        setSize(newWidth, newHeight);
         setLocationRelativeTo(null);
 
+        // Panel principal con fondo degradado
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -168,6 +190,7 @@ public class Home extends JFrame {
             }
         };
 
+        // Botón del menú lateral
         JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/menu.png")));
         menuButton.setPreferredSize(new Dimension(40, 40));
         menuButton.setContentAreaFilled(false);
@@ -179,19 +202,22 @@ public class Home extends JFrame {
         menuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!menuVisible) {
-                    desplace.desplazarIzquierda(sideMenu, sideMenu.getX(), -180, 10, 5);
-                    menuVisible = true;
-                } else {
-                    desplace.desplazarDerecha(sideMenu, sideMenu.getX(), 0, 10, 5);
-                    menuVisible = false;
+                try {
+                    if (!menuVisible) {
+                        desplace.desplazarDerecha(sideMenu, sideMenu.getX(), 0, 10, 5); // Mostrar el sideMenu
+                        menuVisible = true;
+                    } else {
+                        desplace.desplazarIzquierda(sideMenu, sideMenu.getX(), -180, 10, 5); // Ocultar el sideMenu
+                        menuVisible = false;
+                    }
+                } catch (Exception ex) {
+                    // Manejo de excepciones relacionadas con el desplazamiento del menú
+                    ex.printStackTrace();
                 }
             }
         });
-        
-        
-        
 
+        // Botón de búsqueda
         JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/search.png")));
         searchButton.setPreferredSize(new Dimension(40, 40));
         searchButton.setContentAreaFilled(false);
@@ -199,6 +225,7 @@ public class Home extends JFrame {
         searchButton.setFocusable(false);
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        // Panel de búsqueda con esquinas redondeadas
         RoundedPanel searchPanel = new RoundedPanel(42);
         searchPanel.setPreferredSize(new Dimension(330, 30));
 
@@ -217,34 +244,44 @@ public class Home extends JFrame {
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String searchText = searchBar.getText();
-                // Implement your search logic here using the 'searchText'
-                // For example, display a message with the search text:
-                JOptionPane.showMessageDialog(Home.this, "Searching for: " + searchText);
+                try {
+                    String searchText = searchBar.getText();
+                    JOptionPane.showMessageDialog(Home.this, "Searching for: " + searchText);
+                } catch (Exception ex) {
+                    // Manejo de excepciones relacionadas con la búsqueda
+                    ex.printStackTrace();
+                }
             }
         });
 
+        // Botón circular de agregar
         Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/user-plus.png"));
         CircularButton addButton = new CircularButton(addButtonIcon);
 
-        addButton.setBounds(400, 610, 80, 80);
+        int addButtonX = getWidth() - 80 - 30;
+        int addButtonY = getHeight() - 80 - 50;
+        addButton.setBounds(addButtonX, addButtonY, 80, 80);
         addButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        getLayeredPane().add(addButton, JLayeredPane.PALETTE_LAYER);
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose();
-                GestionContactos.main(new String[0]);
+                try {
+                    // Abre el formulario addContact aquí
+                    dispose();
+                    GestionContactos.main(new String[0]);
+                } catch (Exception ex) {
+                    // Manejo de excepciones relacionadas con la apertura del formulario
+                    ex.printStackTrace();
+                }
             }
         });
-        
-        
 
+        getLayeredPane().add(addButton, JLayeredPane.PALETTE_LAYER);
 
+        // Agrega el sideMenu en una capa diferente
         sideMenu = new SideMenu();
-        sideMenu.setBounds(0, 0, 180, getHeight());
-
+        sideMenu.setBounds(-180, 0, 180, getHeight());
         getLayeredPane().add(sideMenu, JLayeredPane.PALETTE_LAYER);
 
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -257,5 +294,20 @@ public class Home extends JFrame {
 
         getContentPane().add(mainPanel);
         setVisible(true);
+
+        // Listener para actualizar la posición del botón de agregar al cambiar el tamaño de la ventana
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                try {
+                    int addButtonX = getWidth() - 80 - 30;
+                    int addButtonY = getHeight() - 80 - 50;
+                    addButton.setBounds(addButtonX, addButtonY, 80, 80);
+                } catch (Exception ex) {
+                    // Manejo de excepciones relacionadas con el cambio de tamaño de la ventana
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 }
