@@ -2,15 +2,148 @@ package org.ripple.core;
 
 import desplazable.Desface;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-// Clase para crear un panel con esquinas redondeadas
+class Contact {
+    private String name;
+    private String phoneNumber;
+    private BufferedImage profileImage;
+
+    public Contact(String name, String phoneNumber, String profileImagePath) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        loadProfileImage(profileImagePath);
+    }
+
+    private void loadProfileImage(String imagePath) {
+        try {
+            profileImage = ImageIO.read(getClass().getResource(imagePath));
+        } catch (IOException e) {
+            // Manejar la excepción adecuadamente, por ejemplo, lanzando una excepción personalizada
+            e.printStackTrace();
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public BufferedImage getProfileImage() {
+        return profileImage;
+    }
+}
+
+class ContactPanel extends JPanel {
+    private final Contact contact;
+
+    public ContactPanel(Contact contact) {
+        this.contact = contact;
+        setOpaque(false);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JOptionPane.showMessageDialog(null, "Clickeo sobre: " + contact.getName());
+            }
+        });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        int width = getWidth();
+        int height = getHeight();
+        int arc = 40;
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setColor(Color.WHITE);
+        g2d.fillRoundRect(0, 0, width, height, arc, arc);
+
+        BufferedImage profileImage = contact.getProfileImage();
+        int imageSize = 0;
+        if (profileImage != null) {
+            imageSize = height - 40;
+            int x = 20;
+            int y = 20;
+            g2d.setClip(new Ellipse2D.Double(x, y, imageSize, imageSize));
+            g2d.drawImage(profileImage, x, y, imageSize, imageSize, null);
+            g2d.setClip(null); // Restablecer el clip
+        }
+
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 16));
+        String name = contact.getName();
+        int textX = imageSize + 40; // Comenzar el texto después de la imagen
+        int textY = height / 4 + g2d.getFontMetrics().getHeight() / 2; // Centrar verticalmente en la parte superior
+        g2d.drawString(name, textX, textY);
+
+        int lineY = height / 2 - 9;
+        int lineStartX = textX; // Inicio de la línea
+        int lineEndX = width - 300; // Fin de la línea
+        g2d.setColor(Color.GRAY);
+        g2d.drawLine(lineStartX, lineY, lineEndX, lineY);
+
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+        String phoneNumber = contact.getPhoneNumber();
+        textY = (height + lineY) / 3 + g2d.getFontMetrics().getHeight() / 2; // Centrar verticalmente entre la línea y la parte inferior
+        g2d.drawString(phoneNumber, textX, textY);
+    }
+}
+
+class ContactList extends JPanel {
+    private List<Contact> contacts;
+    private int visibleContacts;
+    private int scrollPosition;
+
+    public ContactList(List<Contact> contacts) {
+        this.contacts = contacts;
+        this.visibleContacts = 4;
+        this.scrollPosition = 0;
+        setOpaque(false);
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        updateContactPanels();
+    }
+
+    public void setScrollPosition(int scrollPosition) {
+        this.scrollPosition = scrollPosition;
+        updateContactPanels();
+    }
+
+    private void updateContactPanels() {
+        removeAll();
+
+        for (int i = scrollPosition; i < Math.min(scrollPosition + visibleContacts, contacts.size()); i++) {
+            Contact contact = contacts.get(i);
+            ContactPanel contactPanel = new ContactPanel(contact);
+            contactPanel.setLocation(20 + 100 * i, 100);
+            add(contactPanel);
+
+            if (i < visibleContacts - 1) {
+                add(Box.createRigidArea(new Dimension(0, 10)));
+            }
+        }
+
+        revalidate();
+        repaint();
+    }
+}
+
+// Creacion de la clase RoundedPanel
 class RoundedPanel extends JPanel {
     private final int arc;
 
@@ -33,9 +166,7 @@ class RoundedPanel extends JPanel {
     }
 }
 
-// Clase para crear un botón circular
 class CircularButton extends JButton {
-
     private static final int BUTTON_SIZE = 50;
 
     public CircularButton(Icon icon) {
@@ -57,10 +188,10 @@ class CircularButton extends JButton {
     }
 }
 
-// Clase para el menú lateral
 class SideMenu extends JLayeredPane {
     private boolean menuVisible = false;
     private SideMenu sideMenu;
+    private Desface desplace;
 
     public boolean isMenuVisible() {
         return menuVisible;
@@ -93,8 +224,7 @@ class SideMenu extends JLayeredPane {
         appLabelMenu.setBounds(0, 10, 180, 34);
         add(appLabelMenu, Integer.valueOf(1));
 
-        // Información de los botones del menú
-        String[] buttonInfo = {"/images/Core/home.png", "Home", "/images/Core/user.png", "Perfil", "/images/Core/hash.png", "Eventos", "/images/Core/sliders.png", "Ajustes", "/images/Core/log-out.png", "Logout"};
+        String[] buttonInfo = {"/images/Core/user.png", "Perfil", "/images/Core/hash.png", "Etiquetas", "/images/Core/sliders.png", "Ajustes", "/images/Core/log-out.png", "Logout"};
 
         for (int i = 0; i < buttonInfo.length; i += 2) {
             JButton button = createNavButton(buttonInfo[i], buttonInfo[i + 1]);
@@ -103,7 +233,6 @@ class SideMenu extends JLayeredPane {
         }
     }
 
-    // Método para crear un botón de navegación
     private JButton createNavButton(String iconPath, String label) {
         JButton button = new JButton();
         button.setOpaque(false);
@@ -128,22 +257,60 @@ class SideMenu extends JLayeredPane {
 
         button.add(buttonPanel);
 
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Acciones al hacer clic en el botón
-            }
-        });
+        switch (label) {
+            case "Perfil":
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                    }
+                });
+                break;
+            case "Etiquetas":
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                    }
+                });
+                break;
+            case "Ajustes":
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Settings settings = new Settings();
+                        settings.setVisible(true);
+                    }
+                });
+                break;
+            case "Logout":
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // Crear un JOptionPane
+                        int response = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que quieres salir de la aplicación?", "Confirmar salida", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+                        // Verificar la respuesta del usuario
+                        if (response == JOptionPane.YES_OPTION) {
+                            LogIn login = new LogIn();
+                        }
+                    }
+                });
+                break;
+
+            default:
+                break;
+        }
 
         return button;
     }
 }
 
-// Clase principal de la aplicación
 public class Home extends JFrame {
     private Desface desplace;
     private boolean menuVisible = false;
     private SideMenu sideMenu;
+
+    private List<Contact> contacts;
+    private int scrollPosition;
 
     public Home() {
         initializeUI();
@@ -152,13 +319,12 @@ public class Home extends JFrame {
 
     private void initializeUI() {
         setTitle("Ripple");
-        setMinimumSize(new Dimension(520, 400));
+        setMinimumSize(new Dimension(520, 900));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 getClass().getResource("/images/logo.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Configuración del tamaño de la ventana
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice gd = ge.getDefaultScreenDevice();
         DisplayMode mode = gd.getDisplayMode();
@@ -173,7 +339,6 @@ public class Home extends JFrame {
         setSize(newWidth, newHeight);
         setLocationRelativeTo(null);
 
-        // Panel principal con fondo degradado
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -190,34 +355,6 @@ public class Home extends JFrame {
             }
         };
 
-        // Botón del menú lateral
-        JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/menu.png")));
-        menuButton.setPreferredSize(new Dimension(40, 40));
-        menuButton.setContentAreaFilled(false);
-        menuButton.setBorderPainted(false);
-        menuButton.setFocusable(false);
-        menuButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        menuButton.setMargin(new Insets(5, 5, 5, 5));
-
-        menuButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    if (!menuVisible) {
-                        desplace.desplazarDerecha(sideMenu, sideMenu.getX(), 0, 10, 5); // Mostrar el sideMenu
-                        menuVisible = true;
-                    } else {
-                        desplace.desplazarIzquierda(sideMenu, sideMenu.getX(), -180, 10, 5); // Ocultar el sideMenu
-                        menuVisible = false;
-                    }
-                } catch (Exception ex) {
-                    // Manejo de excepciones relacionadas con el desplazamiento del menú
-                    ex.printStackTrace();
-                }
-            }
-        });
-
-        // Botón de búsqueda
         JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/search.png")));
         searchButton.setPreferredSize(new Dimension(40, 40));
         searchButton.setContentAreaFilled(false);
@@ -225,7 +362,6 @@ public class Home extends JFrame {
         searchButton.setFocusable(false);
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Panel de búsqueda con esquinas redondeadas
         RoundedPanel searchPanel = new RoundedPanel(42);
         searchPanel.setPreferredSize(new Dimension(330, 30));
 
@@ -254,7 +390,6 @@ public class Home extends JFrame {
             }
         });
 
-        // Botón circular de agregar
         Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/user-plus.png"));
         CircularButton addButton = new CircularButton(addButtonIcon);
 
@@ -276,13 +411,53 @@ public class Home extends JFrame {
                 }
             }
         });
-
         getLayeredPane().add(addButton, JLayeredPane.PALETTE_LAYER);
 
-        // Agrega el sideMenu en una capa diferente
+        contacts = new ArrayList<>();
+        contacts.add(new Contact("Carlos", "+503 456-7890", "/images/profile.png"));
+        contacts.add(new Contact("Marisol", "+526 654-3210", "/images/profile2.png"));
+        contacts.add(new Contact("Roberto", "+1 555-5555", "/images/profile3.png"));
+        contacts.add(new Contact("Alice", "+503 222-3333", "/images/profile4.png"));
+
+        ContactList contactList = new ContactList(contacts);
+        contactList.setBounds(20, 100, 520, 400);
+        getContentPane().add(contactList);
+
         sideMenu = new SideMenu();
         sideMenu.setBounds(-180, 0, 180, getHeight());
         getLayeredPane().add(sideMenu, JLayeredPane.PALETTE_LAYER);
+
+        JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/menu.png")));
+        menuButton.setPreferredSize(new Dimension(40, 40));
+        menuButton.setContentAreaFilled(false);
+        menuButton.setBorderPainted(false);
+        menuButton.setFocusable(false);
+        menuButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        menuButton.setMargin(new Insets(5, 5, 5, 5));
+
+        menuButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    if (!menuVisible) {
+                        desplace.desplazarDerecha(sideMenu, sideMenu.getX(), 0, 10, 5);
+                        menuVisible = true;
+
+                        searchButton.setEnabled(false);
+                        searchBar.setEnabled(false);
+                    } else {
+                        desplace.desplazarIzquierda(sideMenu, sideMenu.getX(), -180, 10, 5);
+                        menuVisible = false;
+
+                        searchButton.setEnabled(true);
+                        searchBar.setEnabled(true);
+                    }
+                } catch (Exception ex) {
+                    // Manejo de excepciones relacionadas con el desplazamiento del menú
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
@@ -295,7 +470,6 @@ public class Home extends JFrame {
         getContentPane().add(mainPanel);
         setVisible(true);
 
-        // Listener para actualizar la posición del botón de agregar al cambiar el tamaño de la ventana
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -304,7 +478,6 @@ public class Home extends JFrame {
                     int addButtonY = getHeight() - 80 - 50;
                     addButton.setBounds(addButtonX, addButtonY, 80, 80);
                 } catch (Exception ex) {
-                    // Manejo de excepciones relacionadas con el cambio de tamaño de la ventana
                     ex.printStackTrace();
                 }
             }
