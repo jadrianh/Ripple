@@ -39,12 +39,24 @@ public class LogIn extends JFrame {
     private void initializeUI() {
         //--------------Configuracion principal--------------//
         setTitle("Ripple");
-        setSize(520, 980);
-        setMinimumSize(new Dimension(520, 400));
+        setMinimumSize(new Dimension(520, 980));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
-                Objects.requireNonNull(getClass().getResource("/images/logo.png"))));
+                getClass().getResource("/images/logo.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        DisplayMode mode = gd.getDisplayMode();
+
+        int screenWidth = mode.getWidth();
+        int screenHeight = mode.getHeight();
+        int smallerDimension = Math.min(screenWidth, screenHeight);
+
+        int newWidth = smallerDimension * 520 / 980;
+        int newHeight = smallerDimension;
+
+        setSize(newWidth, newHeight);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel() {
@@ -135,7 +147,6 @@ public class LogIn extends JFrame {
         constraints.gridy = 3;
         logInPanel.add(passwordField, constraints);
 
-        // Icono password
         JLabel passwordIcon = new JLabel();
         constraints.gridx = 0;
         constraints.gridy = 3;
@@ -155,6 +166,17 @@ public class LogIn extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Crear el nuevo JCheckBox
+        JCheckBox rememberCheckBox = new JCheckBox("Recordar contraseña?");
+        rememberCheckBox.setBackground(Color.decode("#FFFFFF"));
+        rememberCheckBox.setFont(new Font("Verdana", Font.PLAIN, 12));
+        rememberCheckBox.setForeground(Color.decode("#00A7F8"));
+        rememberCheckBox.setFocusable(false);
+        constraints.gridx = 0;
+        constraints.gridy = 4;
+        constraints.gridwidth = 2;
+        logInPanel.add(rememberCheckBox, constraints);
 
         JButton loginButton = new JButton("Login");
         
@@ -178,7 +200,7 @@ public class LogIn extends JFrame {
         loginButton.setFocusable(false);
         loginButton.setBorder(null);
         constraints.gridx = 0;
-        constraints.gridy = 4;
+        constraints.gridy = 5;
         constraints.gridwidth = 2;
         loginButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -191,11 +213,11 @@ public class LogIn extends JFrame {
         JButton registerButton = new JButton("¿No tienes cuenta? Regístrate");
         registerButton.setHorizontalAlignment(SwingConstants.LEFT);
         registerButton.setForeground(Color.decode("#00A7F8"));
-        registerButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        registerButton.setFont(new Font("Verdana", Font.PLAIN, 14));
         registerButton.setFocusable(false);
         registerButton.setContentAreaFilled(false);
         registerButton.setBorder(null);
-        constraints.gridy = 5;
+        constraints.gridy = 6;
         registerButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
