@@ -5,10 +5,14 @@ import desplazable.Desface;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.color.ProfileDataException;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +60,7 @@ class ContactPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 JOptionPane.showMessageDialog(null, "Clickeo sobre: " + contact.getName());
+                Profile profile = new Profile();
             }
         });
     }
@@ -110,18 +115,56 @@ class ContactList extends JPanel {
     private int visibleContacts;
     private int scrollPosition;
 
-    public ContactList(List<Contact> contacts) {
-        this.contacts = contacts;
-        this.visibleContacts = 4;
+    public ContactList() {
+        this.contacts = new ArrayList<>();
         this.scrollPosition = 0;
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        updateContactPanels();
+        updateContactPanelsFromDatabase();
     }
-
     public void setScrollPosition(int scrollPosition) {
         this.scrollPosition = scrollPosition;
         updateContactPanels();
+    }
+
+    private void updateContactPanelsFromDatabase() {
+        removeAll();
+
+        try {
+            String jdbcURL = "jdbc:mysql://localhost:3306/c";
+            String user = "root";
+            String password = "Ragnar2105";
+
+            Connection connection = DriverManager.getConnection(jdbcURL, user, password);
+            Statement statement = connection.createStatement();
+
+            String selectQuery = "SELECT name, phoneNumber FROM contacts";
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String phoneNumber = resultSet.getString("phoneNumber");
+
+                Contact contact = new Contact(name, phoneNumber, null); // You may load profile image if available
+                contacts.add(contact);
+            }
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            // Manejo de excepciones relacionadas con la base de datos
+            e.printStackTrace();
+        }
+
+        for (Contact contact : contacts) {
+            ContactPanel contactPanel = new ContactPanel(contact);
+            add(contactPanel);
+            add(Box.createRigidArea(new Dimension(0, 10));
+        }
+
+        revalidate();
+        repaint();
     }
 
     private void updateContactPanels() {
@@ -318,8 +361,9 @@ public class Home extends JFrame {
     }
 
     private void initializeUI() {
+        //--------------Configuracion principal--------------//
         setTitle("Ripple");
-        setMinimumSize(new Dimension(520, 900));
+        setMinimumSize(new Dimension(520, 980));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 getClass().getResource("/images/logo.png")));
@@ -402,7 +446,7 @@ public class Home extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // Abre el formulario addContact aquí
+                    // Abre el formulario
                     dispose();
                     GestionContactos.main(new String[0]);
                 } catch (Exception ex) {
