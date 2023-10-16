@@ -1,6 +1,7 @@
 package org.ripple.core;
 
 import desplazable.Desface;
+import org.ripple.CConexion;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -10,9 +11,7 @@ import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,9 +117,37 @@ class ContactList extends JPanel {
     public ContactList() {
         this.contacts = new ArrayList<>();
         this.scrollPosition = 0;
+        this.visibleContacts = 4;
         setOpaque(false);
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        updateContactPanelsFromDatabase();
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS)); // Corrección: Agregar un paréntesis adicional
+        loadContactsFromDatabase(); // Cargar contactos desde la base de datos
+        updateContactPanels();
+    }
+
+    private void loadContactsFromDatabase() {
+        CConexion conexion = new CConexion();
+        Connection dbConnection = conexion.establecerConexion();
+
+        if (dbConnection != null) {
+            try {
+                String query = "SELECT name, phoneNumber FROM contacts";
+                PreparedStatement statement = dbConnection.prepareStatement(query);
+                ResultSet result = statement.executeQuery();
+
+                while (result.next()) {
+                    String name = result.getString("name");
+                    String phoneNumber = result.getString("phoneNumber");
+                    Contact contact = new Contact(name, phoneNumber, null); // No hay imagen por ahora
+                    contacts.add(contact);
+                }
+
+                result.close();
+                statement.close();
+                dbConnection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
     public void setScrollPosition(int scrollPosition) {
         this.scrollPosition = scrollPosition;
@@ -160,7 +187,7 @@ class ContactList extends JPanel {
         for (Contact contact : contacts) {
             ContactPanel contactPanel = new ContactPanel(contact);
             add(contactPanel);
-            add(Box.createRigidArea(new Dimension(0, 10));
+            add(Box.createRigidArea(new Dimension(0, 10))); // Corrección: Agregar un paréntesis adicional y punto y coma al final
         }
 
         revalidate();
@@ -351,8 +378,7 @@ public class Home extends JFrame {
     private Desface desplace;
     private boolean menuVisible = false;
     private SideMenu sideMenu;
-
-    private List<Contact> contacts;
+    private ContactList contactList;
     private int scrollPosition;
 
     public Home() {
@@ -369,6 +395,7 @@ public class Home extends JFrame {
                 getClass().getResource("/images/logo.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        //-------------Configuracion resolucion-------------//
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice gd = ge.getDefaultScreenDevice();
         DisplayMode mode = gd.getDisplayMode();
@@ -457,13 +484,7 @@ public class Home extends JFrame {
         });
         getLayeredPane().add(addButton, JLayeredPane.PALETTE_LAYER);
 
-        contacts = new ArrayList<>();
-        contacts.add(new Contact("Carlos", "+503 456-7890", "/images/profile.png"));
-        contacts.add(new Contact("Marisol", "+526 654-3210", "/images/profile2.png"));
-        contacts.add(new Contact("Roberto", "+1 555-5555", "/images/profile3.png"));
-        contacts.add(new Contact("Alice", "+503 222-3333", "/images/profile4.png"));
-
-        ContactList contactList = new ContactList(contacts);
+        contactList = new ContactList();
         contactList.setBounds(20, 100, 520, 400);
         getContentPane().add(contactList);
 

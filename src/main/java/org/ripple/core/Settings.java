@@ -16,7 +16,7 @@ public class Settings extends JFrame {
         setLayout(new BorderLayout());
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 getClass().getResource("/images/Core/sliders.png")));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         // Crear el panel principal que contiene los otros dos paneles
@@ -38,13 +38,12 @@ public class Settings extends JFrame {
         mainPanel.setLayout(new BorderLayout());
 
         // Crear el panel superior para el título "Opciones" (transparente)
-        JPanel titlePanel = new JPanel();
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel titleLabel = new JLabel("Opciones");
         titleLabel.setFont(new Font("Verdana", Font.BOLD, 26));
         titleLabel.setForeground(Color.WHITE);
         titlePanel.setOpaque(false);
         titlePanel.add(titleLabel);
-
         // Crear el panel de opciones con fondo blanco y bordes redondeados
         JPanel optionsPanel = new JPanel() {
             @Override
@@ -60,7 +59,7 @@ public class Settings extends JFrame {
 
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
 
-        optionsPanel.add(createButton("Importar Contactos", "/images/Core/download.png", new ActionListener() {
+        optionsPanel.add(createButton(" Importar Contactos", "/images/Core/download.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 1");
@@ -68,7 +67,7 @@ public class Settings extends JFrame {
         }));
         optionsPanel.add(createSeparator());
 
-        optionsPanel.add(createButton("Exportar Contactos", "/images/Core/upload.png", new ActionListener() {
+        optionsPanel.add(createButton(" Exportar Contactos", "/images/Core/upload.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 2");
@@ -76,7 +75,7 @@ public class Settings extends JFrame {
         }));
         optionsPanel.add(createSeparator());
 
-        optionsPanel.add(createButton("Modo Claro", "/images/Core/sun.png", new ActionListener() {
+        optionsPanel.add(createButton(" Modo Claro", "/images/Core/sun.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 4");
@@ -84,7 +83,7 @@ public class Settings extends JFrame {
         }));
         optionsPanel.add(createSeparator());
 
-        optionsPanel.add(createButton("Ordenar Por: Nombre", "/images/Core/list.png", new ActionListener() {
+        optionsPanel.add(createButton(" Ordenar Por: Nombre", "/images/Core/list.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 3");
@@ -92,7 +91,7 @@ public class Settings extends JFrame {
         }));
         optionsPanel.add(createSeparator());
 
-        optionsPanel.add(createButton("Acerca de Ripple", "/images/Core/info.png", new ActionListener() {
+        optionsPanel.add(createButton(" Acerca de Ripple", "/images/Core/info.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 5");
@@ -100,7 +99,7 @@ public class Settings extends JFrame {
         }));
         optionsPanel.add(createSeparator());
 
-        optionsPanel.add(createButton("Eliminar Cuenta", "/images/Core/trash.png", new ActionListener() {
+        optionsPanel.add(createButton(" Eliminar Cuenta", "/images/Core/trash.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 6");
@@ -118,6 +117,11 @@ public class Settings extends JFrame {
                 ((JButton) button).setFocusable(false);
             }
         }
+
+        optionsPanel.setOpaque(false);
+
+        int margin = 30;
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(margin, margin, margin, margin));
 
         mainPanel.add(titlePanel, BorderLayout.NORTH);
         mainPanel.add(optionsPanel, BorderLayout.CENTER);
