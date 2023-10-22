@@ -1,4 +1,7 @@
-package org.ripple.core;
+package org.ripple.core.start;
+
+import org.ripple.core.Home;
+import org.ripple.core.Registro;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -7,28 +10,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
-
-class PlaceholderTextField extends JTextField {
-    private String placeholder;
-
-    public PlaceholderTextField(String placeholder) {
-        this.placeholder = placeholder;
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        if (getText().isEmpty()) {
-            Font originalFont = g.getFont();
-            g.setFont(originalFont);
-            g.setColor(Color.GRAY);
-            g.drawString(placeholder, getInsets().left, (getHeight() + g.getFontMetrics().getHeight()) / 2);
-            g.setFont(originalFont);
-        }
-    }
-}
 
 public class LogIn extends JFrame {
 
@@ -99,21 +80,17 @@ public class LogIn extends JFrame {
         constraints.gridwidth = 2;
         logInPanel.add(titleLabel, constraints);
 
-        // Línea divisora
         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
         separator.setForeground(Color.BLACK);
         constraints.gridy = 1;
         logInPanel.add(separator, constraints);
 
-        // Icono username
         JLabel usernameIcon = new JLabel();
         constraints.gridy = 2;
         constraints.gridwidth = 1;
         try {
-            // Cargar la imagen desde el archivo "user.png" en la carpeta "resources"
             ImageIcon originalIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/Core/user.png")));
 
-            // Escalar la imagen al tamaño deseado (por ejemplo, 50x50 píxeles)
             int width = 30;
             int height = 30;
             Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
@@ -126,7 +103,6 @@ public class LogIn extends JFrame {
         logInPanel.add(usernameIcon, constraints);
 
 
-        // Crear campos de texto sin bordes y con línea inferior
         PlaceholderTextField usernameField = createTextField("Username");
         PlaceholderTextField passwordField = createTextField("Password");
 
@@ -136,9 +112,7 @@ public class LogIn extends JFrame {
         usernameField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                // Si el usuario presiona la tecla Intro
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    // Desplazar el cursor del teclado al campo de contraseña
                     passwordField.requestFocus();
                 }
             }
@@ -153,10 +127,8 @@ public class LogIn extends JFrame {
         logInPanel.add(passwordIcon, constraints);
 
         try {
-            // Cargar la imagen desde el archivo "password.png" en la carpeta "resources"
             ImageIcon originalPasswordIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/Core/lock.png")));
 
-            // Escalar la imagen al tamaño deseado (por ejemplo, 50x50 píxeles)
             int width = 30;
             int height = 30;
             Image scaledPasswordImage = originalPasswordIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
@@ -167,7 +139,7 @@ public class LogIn extends JFrame {
             e.printStackTrace();
         }
 
-        // Crear el nuevo JCheckBox
+        // Crear el nuevo CheckBox
         JCheckBox rememberCheckBox = new JCheckBox("Recordar contraseña?");
         rememberCheckBox.setBackground(Color.decode("#FFFFFF"));
         rememberCheckBox.setFont(new Font("Verdana", Font.PLAIN, 12));
@@ -183,12 +155,9 @@ public class LogIn extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Oculta el formulario LogIn
                 setVisible(false);
 
-                // Crea una instancia del formulario Home
                 Home homeForm = new Home();
-                // Muestra el formulario Home
                 homeForm.setVisible(true);
             }
         });
@@ -229,12 +198,9 @@ public class LogIn extends JFrame {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Oculta el formulario LogIn
                 setVisible(false);
 
-                // Crea una instancia del formulario RegistroVentana
                 Registro registroForm = new Registro();
-                // Muestra el formulario de registro
                 registroForm.setVisible(true);
             }
         });
