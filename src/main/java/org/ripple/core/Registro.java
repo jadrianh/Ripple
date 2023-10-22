@@ -1,4 +1,6 @@
 package org.ripple.core;
+import org.ripple.core.start.LogIn;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
