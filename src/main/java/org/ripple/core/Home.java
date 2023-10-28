@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.ripple.core.start.LogIn;
 
 class Contact {
     private String name;
@@ -126,7 +127,7 @@ class ContactList extends JPanel {
 
     private void loadContactsFromDatabase() {
         CConexion conexion = new CConexion();
-        Connection dbConnection = conexion.establecerConexion();
+        Connection dbConnection = conexion.establecerConection();
 
         if (dbConnection != null) {
             try {

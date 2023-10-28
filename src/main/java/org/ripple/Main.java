@@ -1,8 +1,8 @@
 package org.ripple;
 
-import org.ripple.core.LogIn;
 import org.ripple.core.Home;
 import org.ripple.core.Settings;
+import org.ripple.core.start.LogIn;
 
 public class Main {
     public static void main(String[] args) {
