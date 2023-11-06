@@ -27,12 +27,12 @@ public class CConexion {
             // Configura las propiedades para la conexión a MySQL
             Properties props = new Properties();
             props.setProperty("user", "root"); 
-            props.setProperty("password", "RooT1"); 
+            props.setProperty("password", "Ragnar2105"); 
             props.setProperty("useSSL", "false"); 
             props.setProperty("serverTimezone", "UTC"); 
 
             // Establece la conexión utilizando las propiedades
-            cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/rippleDB", props);
+            cn = DriverManager.getConnection("jdbc:mysql://localhost:3307/rippleDB", props);
             JOptionPane.showMessageDialog(null, "Se conectó correctamente a la Base de Datos");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al conectar a la Base de Datos" + e.toString());   

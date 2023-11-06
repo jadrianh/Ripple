@@ -12,26 +12,6 @@ import java.util.Objects;
 import org.ripple.CConexion;
 import org.ripple.core.main.Home;
 
-class PlaceholderTextField extends JTextField {
-    private String placeholder;
-
-    public PlaceholderTextField(String placeholder) {
-        this.placeholder = placeholder;
-    }
-
-    @Override 
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        if (getText().isEmpty()) {
-            Font originalFont = g.getFont();
-            g.setFont(originalFont);
-            g.setColor(Color.GRAY);
-            g.drawString(placeholder, getInsets().left, (getHeight() + g.getFontMetrics().getHeight()) / 2);
-            g.setFont(originalFont);
-        }
-    }
-}
 
 public class LogIn extends JFrame {
 
