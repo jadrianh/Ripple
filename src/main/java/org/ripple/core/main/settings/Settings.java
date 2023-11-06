@@ -1,4 +1,4 @@
-package org.ripple.core;
+package org.ripple.core.main.settings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -75,14 +75,6 @@ public class Settings extends JFrame {
         }));
         optionsPanel.add(createSeparator());
 
-        optionsPanel.add(createButton(" Modo Claro", "/images/Core/sun.png", new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 4");
-            }
-        }));
-        optionsPanel.add(createSeparator());
-
         optionsPanel.add(createButton(" Ordenar Por: Nombre", "/images/Core/list.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -94,7 +86,8 @@ public class Settings extends JFrame {
         optionsPanel.add(createButton(" Acerca de Ripple", "/images/Core/info.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 5");
+                RippleInfo info = new RippleInfo();
+                dispose();
             }
         }));
         optionsPanel.add(createSeparator());

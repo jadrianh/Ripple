@@ -1,6 +1,7 @@
 package org.ripple.core.main;
 
 import desplazable.Desface;
+import org.ripple.core.main.settings.Settings;
 import org.ripple.core.start.LogIn;
 
 import javax.swing.*;
