@@ -2,216 +2,159 @@ package org.ripple.core.start;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.border.MatteBorder;
-import javax.swing.plaf.basic.BasicComboBoxUI;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.sql.ResultSet;
+import org.ripple.CConexion;
 
-public class Register extends JFrame {
-    private JComboBox<String> phoneNumberComboBox;
+public class Register extends JFrame implements ActionListener {
+    private JTextField idUsuarioField, usuarioField, nombreField, apellidoField;
+    private JPasswordField contrasenaField;
+    private JButton registrarseButton, volverButton;
+
+    private Color backgroundColor = new Color(0, 170, 255);
+    private Color buttonColor = new Color(0, 167, 248);
+    private Color buttonTextColor = Color.WHITE;
+    private Color labelTextColor = Color.BLACK;
+
+    private Connection cn;
 
     public Register() {
-        initializeUI();
-    }
-
-    private void initializeUI() {
         setTitle("Registro");
-        setMinimumSize(new Dimension(520, 980));
-        setLayout(new BorderLayout(0, 100));
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/logo.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setSize(500, 400);
 
-        JPanel mainPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
+        CConexion conexionManager = new CConexion();
+        cn = conexionManager.obtenerConexion();
 
-                GradientPaint gradient = new GradientPaint(
-                        0, 0, Color.decode("#00AAFF"),
-                        0, getHeight(), Color.decode("#95F4FF")
-                );
+        if (cn == null) {
+            JOptionPane.showMessageDialog(null, "No se pudo establecer la conexión a la Base de Datos");
+        } else {
+            JPanel panel = new JPanel();
+            panel.setLayout(new GridLayout(4, 2));
+            panel.setBackground(backgroundColor);
 
-                g2d.setPaint(gradient);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-            }
-        };
+            JLabel idUsuarioLabel = new JLabel("ID:");
+            JLabel usuarioLabel = new JLabel("Usuario:");
+            JLabel contrasenaLabel = new JLabel("Contraseña:");
+            JLabel nombreLabel = new JLabel("Nombre:");
+            JLabel apellidoLabel = new JLabel("Apellido:");
 
-        JPanel registroPanel = createRegistroPanel();
+            idUsuarioLabel.setForeground(labelTextColor);
+            usuarioLabel.setForeground(labelTextColor);
+            contrasenaLabel.setForeground(labelTextColor);
+            nombreLabel.setForeground(labelTextColor);
+            apellidoLabel.setForeground(labelTextColor);
 
-        getContentPane().add(mainPanel);
-        mainPanel.add(registroPanel, BorderLayout.PAGE_END);
-        setVisible(true);
+            idUsuarioField = new JTextField();
+            usuarioField = new JTextField();
+            contrasenaField = new JPasswordField();
+            nombreField = new JTextField();
+            apellidoField = new JTextField();
+
+            registrarseButton = new JButton("Registrarse");
+            registrarseButton.addActionListener(this);
+            registrarseButton.setPreferredSize(new Dimension(100, 30));
+            registrarseButton.setBackground(buttonColor);
+            registrarseButton.setForeground(buttonTextColor);
+
+            volverButton = new JButton("Volver");
+            volverButton.addActionListener(this);
+            volverButton.setPreferredSize(new Dimension(100, 30));
+            volverButton.setBackground(buttonColor);
+            volverButton.setForeground(buttonTextColor);
+
+            panel.add(idUsuarioLabel);
+            panel.add(idUsuarioField);
+            panel.add(usuarioLabel);
+            panel.add(usuarioField);
+            panel.add(contrasenaLabel);
+            panel.add(contrasenaField);
+            panel.add(nombreLabel);
+            panel.add(nombreField);
+            panel.add(apellidoLabel);
+            panel.add(apellidoField);
+            panel.add(new JLabel()); // Leave an empty space for alignment
+            panel.add(registrarseButton);
+            panel.add(volverButton);
+
+            add(panel);
+
+            setVisible(true);
+        }
     }
 
-    private JPanel createRegistroPanel() {
-        JPanel registroPanel = new JPanel(new GridBagLayout());
-        registroPanel.setPreferredSize(new Dimension(450, 500));
-        registroPanel.setBackground(Color.WHITE);
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == registrarseButton) {
+            String idUsuario = idUsuarioField.getText();
+            String usuario = usuarioField.getText();
+            char[] contrasena = contrasenaField.getPassword();
+            String nombre = nombreField.getText();
+            String apellido = apellidoField.getText();
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(10, 10, 10, 10);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-
-        JLabel titleLabel = new JLabel("Registro");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 30));
-        titleLabel.setHorizontalAlignment(JLabel.CENTER);
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridwidth = 2;
-        registroPanel.add(titleLabel, constraints);
-
-        ImageIcon usernameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/at-sign.png"))
-                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
-        JLabel usernameIconLabel = new JLabel(usernameIcon);
-        constraints.gridy = 2;
-        constraints.gridx = 0;
-        constraints.gridwidth = 1;
-        registroPanel.add(usernameIconLabel, constraints);
-
-        PlaceholderTextField usernameField = createTextField("Nombre de usuario");
-        constraints.gridx = 1;
-        constraints.gridwidth = 1;
-        registroPanel.add(usernameField, constraints);
-
-        ImageIcon nameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/user.png"))
-                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
-        JLabel nameIconLabel = new JLabel(nameIcon);
-        constraints.gridy = 3;
-        constraints.gridx = 0;
-        constraints.gridwidth = 1;
-        registroPanel.add(nameIconLabel, constraints);
-
-        PlaceholderTextField nameField = createTextField("Nombre");
-        constraints.gridx = 1;
-        constraints.gridwidth = 1;
-        registroPanel.add(nameField, constraints);
-
-        ImageIcon phoneNumberIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-icons/phone.png"))
-                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
-        JLabel phoneNumberLabel = new JLabel(phoneNumberIcon);
-        constraints.gridy = 4;
-        constraints.gridx = 0;
-        constraints.gridwidth = 1;
-        
-        JPanel phoneNumberPanel = new JPanel();
-        phoneNumberPanel.setOpaque(false);
-        phoneNumberPanel.setLayout(new GridBagLayout());
-
-        GridBagConstraints panelConstraints = new GridBagConstraints();
-        panelConstraints.gridx = 0;
-        panelConstraints.gridy = 0;
-        panelConstraints.fill = GridBagConstraints.NONE;
-        phoneNumberPanel.add(phoneNumberLabel, panelConstraints);
-        panelConstraints.gridx = 1;
-        panelConstraints.fill = GridBagConstraints.HORIZONTAL;
-        panelConstraints.weightx = 1;
-
-        phoneNumberComboBox = new JComboBox<>(new String[]{"+1", "+86", "+91", "+44", "+81", "+49", "+7", "+55", "+33", "+61", "+52", "+82", "+34", "+39", "+52", "+20", "+27", "+351", "+503", "+502", "+507", "+371", "+569"});
-        phoneNumberComboBox.setPreferredSize(new Dimension(55, 20));
-        phoneNumberComboBox.setBackground(Color.WHITE);
-        phoneNumberComboBox.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        phoneNumberComboBox.setUI(new BasicComboBoxUI() {
-            @Override
-            protected JButton createArrowButton() {
-                JButton button = super.createArrowButton();
-                button.setBackground(Color.WHITE);
-                return button;
+            if (idUsuario.isEmpty() || usuario.isEmpty() || contrasena.length == 0 || nombre.isEmpty() || apellido.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos.");
+            } else {
+                if (existeUsuario(idUsuario, usuario)) {
+                    JOptionPane.showMessageDialog(this, "El nombre de usuario o ID ya existe.");
+                } else {
+                    if (insertarUsuario(idUsuario, usuario, new String(contrasena), nombre, apellido)) {
+                        JOptionPane.showMessageDialog(this, "Registro exitoso");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error al registrar el usuario.");
+                    }
+                }
             }
-        });
-        phoneNumberPanel.add(phoneNumberComboBox, panelConstraints);
-        panelConstraints.gridx = 2;
-        panelConstraints.weightx = 1;
-
-        PlaceholderTextField phoneNumberField = createTextField("Numero de telefono");
-        phoneNumberPanel.add(phoneNumberField, panelConstraints);
-        constraints.gridx = 0;
-        constraints.gridy = 4;
-        constraints.gridwidth = 2;
-        registroPanel.add(phoneNumberPanel, constraints);
-        /////////////////////////////////////////////////
-
-        ImageIcon passwordIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/lock.png"))
-                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
-        JLabel passwordIconLabel = new JLabel(passwordIcon);
-        constraints.gridx = 0;
-        constraints.gridy = 6;
-        constraints.gridwidth = 1;
-        registroPanel.add(passwordIconLabel, constraints);
-
-        PlaceholderTextField passwordField = createTextField("Contraseña");
-        constraints.gridx = 1;
-        constraints.gridwidth = 1;
-        registroPanel.add(passwordField, constraints);
-
-        ImageIcon passwordConfirmIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/lock.png"))
-                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
-        JLabel confirmPasswordIconLabel = new JLabel(passwordConfirmIcon);
-        constraints.gridx = 0;
-        constraints.gridy = 7;
-        constraints.gridwidth = 1;
-        registroPanel.add(confirmPasswordIconLabel, constraints);
-
-        PlaceholderTextField confirmPasswordField = createTextField("Confirmar contraseña");
-        constraints.gridx = 1;
-        constraints.gridwidth = 1;
-        registroPanel.add(confirmPasswordField, constraints);
-
-        JButton registroButton = new JButton("Registrarse");
-        registroButton.setPreferredSize(new Dimension(250, 35));
-        registroButton.setBackground(Color.decode("#00A7F8"));
-        registroButton.setFont(new Font("Arial", Font.PLAIN, 18));
-        registroButton.setForeground(Color.decode("#FFFFFF"));
-        registroButton.setFocusable(false);
-        registroButton.setBorder(null);
-        constraints.gridx = 0;
-        constraints.gridy = 10;
-        constraints.gridwidth = 2;
-        registroPanel.add(registroButton, constraints);
-
-        JButton loginButton = new JButton("¿No tienes cuenta? Regístrate");
-        loginButton.setHorizontalAlignment(SwingConstants.LEFT);
-        loginButton.setForeground(Color.decode("#00A7F8"));
-        loginButton.setFont(new Font("Verdana", Font.PLAIN, 14));
-        loginButton.setFocusable(false);
-        loginButton.setContentAreaFilled(false);
-        loginButton.setBorder(null);
-        constraints.gridx = 0;
-        constraints.gridy = 11;
-        constraints.gridwidth = 2;
-        loginButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            }
-        });
-        registroPanel.add(loginButton, constraints);
-
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-                LogIn loginForm = new LogIn();
-                loginForm.setVisible(true);
-            }
-        });
-
-        return registroPanel;
+        } else if (e.getSource() == volverButton) {
+            dispose();
+            LogIn loginForm = new LogIn();
+            loginForm.setVisible(true);
+        }
     }
-    private PlaceholderTextField createTextField(String placeholderText) {
-        PlaceholderTextField textField = new PlaceholderTextField(placeholderText);
-        textField.setPreferredSize(new Dimension(300, 30));
-        textField.setBorder(null); // Eliminar el borde predeterminado
-        textField.setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY)); // Agregar una línea inferior
-        return textField;
+
+    private boolean existeUsuario(String idUsuario, String usuario) {
+        try {
+            String consulta = "SELECT * FROM UserProfile WHERE idUser = ? OR username = ?";
+            PreparedStatement statement = cn.prepareStatement(consulta);
+            statement.setString(1, idUsuario);
+            statement.setString(2, usuario);
+
+            ResultSet resultado = statement.executeQuery();
+
+            return resultado.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true;
+        }
+    }
+
+    private boolean insertarUsuario(String idUsuario, String usuario, String contrasena, String nombre, String apellido) {
+        try {
+            String consulta = "INSERT INTO UserProfile (idUser, username, password, name, lastname, registerDate) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement statement = cn.prepareStatement(consulta);
+            statement.setString(1, idUsuario);
+            statement.setString(2, usuario);
+            statement.setString(3, contrasena);
+            statement.setString(4, nombre);
+            statement.setString(5, apellido);
+            statement.setTimestamp(6, new Timestamp(new Date().getTime()));
+
+            int filasAfectadas = statement.executeUpdate();
+
+            return filasAfectadas > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new Register();
-            }
+        SwingUtilities.invokeLater(() -> {
+            new Register();
         });
     }
 }

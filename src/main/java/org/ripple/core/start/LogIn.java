@@ -1,9 +1,5 @@
 package org.ripple.core.start;
 
-import org.ripple.CConexion;
-import org.ripple.core.main.Home;
-import org.ripple.core.Registro;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -11,10 +7,31 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.Connection;
+import java.util.Objects;
+import org.ripple.CConexion;
+import org.ripple.core.main.Home;
 
-import static org.ripple.CConexion.conection;
+class PlaceholderTextField extends JTextField {
+    private String placeholder;
+
+    public PlaceholderTextField(String placeholder) {
+        this.placeholder = placeholder;
+    }
+
+    @Override 
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (getText().isEmpty()) {
+            Font originalFont = g.getFont();
+            g.setFont(originalFont);
+            g.setColor(Color.GRAY);
+            g.drawString(placeholder, getInsets().left, (getHeight() + g.getFontMetrics().getHeight()) / 2);
+            g.setFont(originalFont);
+        }
+    }
+}
 
 public class LogIn extends JFrame {
 
@@ -25,24 +42,12 @@ public class LogIn extends JFrame {
     private void initializeUI() {
         //--------------Configuracion principal--------------//
         setTitle("Ripple");
-        setMinimumSize(new Dimension(520, 980));
+        setSize(520, 980);
+        setMinimumSize(new Dimension(520, 400));
         setLayout(new BorderLayout(0, 100));
         setIconImage(Toolkit.getDefaultToolkit().getImage(
-                getClass().getResource("/images/logo.png")));
+                Objects.requireNonNull(getClass().getResource("/images/logo.png"))));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-        DisplayMode mode = gd.getDisplayMode();
-
-        int screenWidth = mode.getWidth();
-        int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight);
-
-        int newWidth = smallerDimension * 520 / 980;
-        int newHeight = smallerDimension;
-
-        setSize(newWidth, newHeight);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel() {
@@ -85,17 +90,21 @@ public class LogIn extends JFrame {
         constraints.gridwidth = 2;
         logInPanel.add(titleLabel, constraints);
 
+        // Línea divisora
         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
         separator.setForeground(Color.BLACK);
         constraints.gridy = 1;
         logInPanel.add(separator, constraints);
 
+        // Icono username
         JLabel usernameIcon = new JLabel();
         constraints.gridy = 2;
         constraints.gridwidth = 1;
         try {
+            // Cargar la imagen desde el archivo "user.png" en la carpeta "resources"
             ImageIcon originalIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/Core/user.png")));
 
+            // Escalar la imagen al tamaño deseado (por ejemplo, 50x50 píxeles)
             int width = 30;
             int height = 30;
             Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
@@ -108,6 +117,7 @@ public class LogIn extends JFrame {
         logInPanel.add(usernameIcon, constraints);
 
 
+        // Crear campos de texto sin bordes y con línea inferior
         PlaceholderTextField usernameField = createTextField("Username");
         PlaceholderTextField passwordField = createTextField("Password");
 
@@ -117,7 +127,9 @@ public class LogIn extends JFrame {
         usernameField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
+                // Si el usuario presiona la tecla Intro
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    // Desplazar el cursor del teclado al campo de contraseña
                     passwordField.requestFocus();
                 }
             }
@@ -126,14 +138,17 @@ public class LogIn extends JFrame {
         constraints.gridy = 3;
         logInPanel.add(passwordField, constraints);
 
+        // Icono password
         JLabel passwordIcon = new JLabel();
         constraints.gridx = 0;
         constraints.gridy = 3;
         logInPanel.add(passwordIcon, constraints);
 
         try {
+            // Cargar la imagen desde el archivo "password.png" en la carpeta "resources"
             ImageIcon originalPasswordIcon = new ImageIcon(ImageIO.read(new File("src/main/resources/images/Core/lock.png")));
 
+            // Escalar la imagen al tamaño deseado (por ejemplo, 50x50 píxeles)
             int width = 30;
             int height = 30;
             Image scaledPasswordImage = originalPasswordIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
@@ -144,37 +159,85 @@ public class LogIn extends JFrame {
             e.printStackTrace();
         }
 
-        // Crear el nuevo CheckBox
-        JCheckBox rememberCheckBox = new JCheckBox("Recordar contraseña?");
-        rememberCheckBox.setBackground(Color.decode("#FFFFFF"));
-        rememberCheckBox.setFont(new Font("Verdana", Font.PLAIN, 12));
-        rememberCheckBox.setForeground(Color.decode("#00A7F8"));
-        rememberCheckBox.setFocusable(false);
-        constraints.gridx = 0;
-        constraints.gridy = 4;
-        constraints.gridwidth = 2;
-        logInPanel.add(rememberCheckBox, constraints);
+        System.out.println("La aplicación se ha iniciado.");
 
         JButton loginButton = new JButton("Login");
+        
 
         loginButton.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // Obtén el contenido de los campos de texto
+        String usuario = usernameField.getText();
+        String contraseña = passwordField.getText();
+
+        // Verifica que ambos campos no estén vacíos
+        if (usuario.isEmpty() || contraseña.isEmpty()) {
+            // Muestra un mensaje de error si uno o ambos campos están vacíos
+            JOptionPane.showMessageDialog(LogIn.this, "Por favor, ingresa tu usuario y contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Sale del método sin continuar
+        }
+
+        // Deshabilita el botón de inicio de sesión para evitar múltiples clics
+        loginButton.setEnabled(false);
+
+        // Muestra un mensaje de espera
+        JOptionPane.showMessageDialog(LogIn.this, "Estableciendo conexión...", "Mensaje", JOptionPane.INFORMATION_MESSAGE);
+
+        // Crea un hilo para establecer la conexión en segundo plano
+        Thread connectionThread = new Thread(new Runnable() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-
-                // Obtener el ID de usuario del usernameField
-                String username = usernameField.getText();
-                int userId = getUserIdFromUsername(username);
-
-                // Guardar el ID de usuario en CConexion
+            public void run() {
                 CConexion conexion = new CConexion();
-                conexion.setUserId(userId);
+                Connection cn = conexion.obtenerConexion();
 
-                Home homeForm = new Home();
-                homeForm.setVisible(true);
+                if (cn != null) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Muestra un mensaje de éxito utilizando JOptionPane
+                            JOptionPane.showMessageDialog(LogIn.this, "La conexión a la base de datos se ha establecido correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+                            // Intenta hacer la consulta
+                            boolean loginExitoso = conexion.consulta(cn, usuario, contraseña);
+
+                            if (loginExitoso) {
+                                // Usuario y contraseña válidos
+                                JOptionPane.showMessageDialog(LogIn.this, "Inicio de sesión exitoso!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+                                // Avanza al siguiente panel (Home) aquí
+                                setVisible(false); // Oculta el formulario LogIn
+                                Home homeForm = new Home(); // Crea una instancia del formulario Home
+                                homeForm.setVisible(true); // Muestra el formulario Home
+                            } else {
+                                // Usuario o contraseña incorrectos
+                                JOptionPane.showMessageDialog(LogIn.this, "Usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+
+                                // Habilita el botón nuevamente
+                                loginButton.setEnabled(true);
+                            }
+                        }
+                    });
+                } else {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Muestra un mensaje de error utilizando JOptionPane
+                            JOptionPane.showMessageDialog(LogIn.this, "Error: No se pudo establecer la conexión a la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+
+                            // Habilita el botón nuevamente
+                            loginButton.setEnabled(true);
+                        }
+                    });
+                }
             }
         });
         
+        // Inicia el hilo para establecer la conexión
+        connectionThread.start();
+            }
+        });
+
         loginButton.setPreferredSize(new Dimension(250, 35));
         loginButton.setBackground(Color.decode("#00A7F8"));
         loginButton.setFont(new Font("Arial", Font.PLAIN, 18));
@@ -182,7 +245,7 @@ public class LogIn extends JFrame {
         loginButton.setFocusable(false);
         loginButton.setBorder(null);
         constraints.gridx = 0;
-        constraints.gridy = 5;
+        constraints.gridy = 4;
         constraints.gridwidth = 2;
         loginButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -195,11 +258,11 @@ public class LogIn extends JFrame {
         JButton registerButton = new JButton("¿No tienes cuenta? Regístrate");
         registerButton.setHorizontalAlignment(SwingConstants.LEFT);
         registerButton.setForeground(Color.decode("#00A7F8"));
-        registerButton.setFont(new Font("Verdana", Font.PLAIN, 14));
+        registerButton.setFont(new Font("Arial", Font.PLAIN, 12));
         registerButton.setFocusable(false);
         registerButton.setContentAreaFilled(false);
         registerButton.setBorder(null);
-        constraints.gridy = 6;
+        constraints.gridy = 5;
         registerButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -211,33 +274,17 @@ public class LogIn extends JFrame {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Oculta el formulario LogIn
                 setVisible(false);
 
-                Registro registroForm = new Registro();
+                // Crea una instancia del formulario RegistroVentana
+                Register registroForm = new Register();
+                // Muestra el formulario de registro
                 registroForm.setVisible(true);
             }
         });
 
         return logInPanel;
-    }
-
-    public int getUserIdFromUsername(String username) {
-        int userId = -1;
-
-        try {
-            String query = "SELECT id FROM Users WHERE username = ?";
-            PreparedStatement statement = conection.prepareStatement(query);
-            statement.setString(1, username);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                userId = resultSet.getInt("id");
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error retrieving user ID");
-        }
-
-        return userId;
     }
 
     private PlaceholderTextField createTextField(String placeholderText) {
@@ -246,5 +293,5 @@ public class LogIn extends JFrame {
         textField.setBorder(null); // Eliminar el borde predeterminado
         textField.setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY)); // Agregar una línea inferior
         return textField;
-    }
+    }    
 }

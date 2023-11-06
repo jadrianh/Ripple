@@ -1,7 +1,7 @@
 package org.ripple;
 
 import org.ripple.core.main.Home;
-import org.ripple.core.Settings;
+import org.ripple.core.main.settings.Settings;
 import org.ripple.core.start.LogIn;
 
 public class Main {
@@ -9,6 +9,7 @@ public class Main {
         LogIn login = new LogIn();
         
         CConexion conexion = new CConexion();
-        conexion.establecerConection();
+        conexion.obtenerConexion();
     }
 }
+

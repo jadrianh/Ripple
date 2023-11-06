@@ -150,9 +150,9 @@ class ContactList extends JPanel {
         Connection dbConnection = null;
 
         try {
-            String jdbcURL = "jdbc:mysql://localhost:3307/rippledb";
+            String jdbcURL = "jdbc:mysql://localhost:3307/rippleDB";
             String user = "root";
-            String password = "Ragnar2105";
+            String password = "RooT1";
 
             dbConnection = DriverManager.getConnection(jdbcURL, user, password);
 
