@@ -16,9 +16,9 @@ public class CConexion {
     Connection conection = null;
     String usuario = "root";
     String contrasena = "Ragnar2105";
-    String bd = "agendaDB";
+    String bd = "rippledb";
     String ip = "localhost";
-    String puerto = "3306";
+    String puerto = "3307";
     
     String cadena = "jdbc:mysql://" + ip + ":" + puerto + "/" + bd;
     
