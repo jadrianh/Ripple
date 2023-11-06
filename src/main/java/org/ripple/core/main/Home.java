@@ -1,12 +1,13 @@
-package org.ripple.core;
+package org.ripple.core.main;
 
 import desplazable.Desface;
 import org.ripple.CConexion;
+import org.ripple.core.GestionContactos;
+import org.ripple.core.start.LogIn;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.color.ProfileDataException;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -16,43 +17,51 @@ import java.util.ArrayList;
 import java.util.List;
 import org.ripple.core.start.LogIn;
 
+
+//////////// Clase que representa un contacto ////////////
 class Contact {
     private String name;
     private String phoneNumber;
     private BufferedImage profileImage;
 
+    // Constructor de la clase Contact
     public Contact(String name, String phoneNumber, String profileImagePath) {
+        // Inicializa un contacto con su nombre, número de teléfono y una imagen de perfil
         this.name = name;
         this.phoneNumber = phoneNumber;
         loadProfileImage(profileImagePath);
     }
 
     private void loadProfileImage(String imagePath) {
+        // Carga la imagen de perfil desde un archivo
         try {
             profileImage = ImageIO.read(getClass().getResource(imagePath));
         } catch (IOException e) {
-            // Manejar la excepción adecuadamente, por ejemplo, lanzando una excepción personalizada
+            // Manejo de errores si la carga de la imagen falla
             e.printStackTrace();
         }
     }
 
+    // Métodos para obtener información del contacto
     public String getName() {
         return name;
     }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
-
     public BufferedImage getProfileImage() {
         return profileImage;
     }
 }
 
+
+//////////// Panel que representa visualmente un contacto ////////////
 class ContactPanel extends JPanel {
     private final Contact contact;
 
+    // Constructor de la clase ContactPanel
     public ContactPanel(Contact contact) {
+        // Inicializa el panel con un contacto y configura acciones de clic
         this.contact = contact;
         setOpaque(false);
 
@@ -67,6 +76,7 @@ class ContactPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+        // Dibuja la representación visual del contacto en cada panel
         super.paintComponent(g);
 
         int width = getWidth();
@@ -86,46 +96,53 @@ class ContactPanel extends JPanel {
             int y = 20;
             g2d.setClip(new Ellipse2D.Double(x, y, imageSize, imageSize));
             g2d.drawImage(profileImage, x, y, imageSize, imageSize, null);
-            g2d.setClip(null); // Restablecer el clip
+            g2d.setClip(null);
         }
 
+        // Formato de elemento: Nombre
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.PLAIN, 16));
         String name = contact.getName();
-        int textX = imageSize + 40; // Comenzar el texto después de la imagen
-        int textY = height / 4 + g2d.getFontMetrics().getHeight() / 2; // Centrar verticalmente en la parte superior
+        int textX = imageSize + 40;
+        int textY = height / 4 + g2d.getFontMetrics().getHeight() / 2;
         g2d.drawString(name, textX, textY);
 
+        // Formato de elemento: Linea divisora
         int lineY = height / 2 - 9;
-        int lineStartX = textX; // Inicio de la línea
-        int lineEndX = width - 300; // Fin de la línea
+        int lineStartX = textX;
+        int lineEndX = width - 300;
         g2d.setColor(Color.GRAY);
         g2d.drawLine(lineStartX, lineY, lineEndX, lineY);
 
+        // Formato de elemento: Numero de telefono
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.PLAIN, 14));
         String phoneNumber = contact.getPhoneNumber();
-        textY = (height + lineY) / 3 + g2d.getFontMetrics().getHeight() / 2; // Centrar verticalmente entre la línea y la parte inferior
+        textY = (height + lineY) / 3 + g2d.getFontMetrics().getHeight() / 2;
         g2d.drawString(phoneNumber, textX, textY);
     }
 }
 
+//////////// Panel que muestra una lista de contactos ////////////
 class ContactList extends JPanel {
     private List<Contact> contacts;
     private int visibleContacts;
     private int scrollPosition;
 
+    // Constructor de la clase ContactList
     public ContactList() {
+        // Inicializa la lista de contactos y otros atributos
         this.contacts = new ArrayList<>();
         this.scrollPosition = 0;
         this.visibleContacts = 4;
         setOpaque(false);
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS)); // Corrección: Agregar un paréntesis adicional
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         loadContactsFromDatabase(); // Cargar contactos desde la base de datos
         updateContactPanels();
     }
 
     private void loadContactsFromDatabase() {
+        // Carga contactos desde una base de datos (MySQL)
         CConexion conexion = new CConexion();
         Connection dbConnection = conexion.establecerConection();
 
@@ -182,7 +199,7 @@ class ContactList extends JPanel {
             connection.close();
         } catch (Exception e) {
             // Manejo de excepciones relacionadas con la base de datos
-            e.printStackTrace();
+            System.err.println("Se ha producido un error al conectar la base datos: " + e.getMessage());
         }
 
         for (Contact contact : contacts) {
@@ -214,17 +231,20 @@ class ContactList extends JPanel {
     }
 }
 
-// Creacion de la clase RoundedPanel
+//////////// Creacion de la clase RoundedPanel ////////////
 class RoundedPanel extends JPanel {
     private final int arc;
 
+    // Constructor de la clase RoundedPanel
     public RoundedPanel(int arc) {
+        // Inicializa el panel con un radio específico para bordes redondeados
         this.arc = arc;
         setOpaque(false);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        // Dibuja un panel redondeado con bordes redondeados
         super.paintComponent(g);
         Dimension arcs = new Dimension(arc, arc);
         int width = getWidth();
@@ -234,144 +254,6 @@ class RoundedPanel extends JPanel {
 
         graphics.setColor(Color.WHITE);
         graphics.fillRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
-    }
-}
-
-class CircularButton extends JButton {
-    private static final int BUTTON_SIZE = 50;
-
-    public CircularButton(Icon icon) {
-        setIcon(icon);
-        setContentAreaFilled(false);
-        setBorderPainted(false);
-        setFocusable(false);
-        setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(Color.WHITE);
-        g2.fill(new Ellipse2D.Double(0, 0, getWidth() - 1, getHeight() - 1));
-        super.paintComponent(g2);
-        g2.dispose();
-    }
-}
-
-class SideMenu extends JLayeredPane {
-    private boolean menuVisible = false;
-    private SideMenu sideMenu;
-    private Desface desplace;
-
-    public boolean isMenuVisible() {
-        return menuVisible;
-    }
-
-    public void setMenuVisible(boolean menuVisible) {
-        this.menuVisible = menuVisible;
-        firePropertyChange("menuVisible", !menuVisible, menuVisible);
-    }
-
-    public SideMenu getMenuDesplegable() {
-        return sideMenu;
-    }
-
-    public void setMenuDesplegable(SideMenu sideMenu) {
-        this.sideMenu = sideMenu;
-    }
-
-    public SideMenu() {
-        setLocation(0, 0);
-        setOpaque(true);
-        setBackground(new Color(255, 255, 255));
-
-        ImageIcon appIconMenu = new ImageIcon(getClass().getResource("/images/ripple.png"));
-        Image appImageMenu = appIconMenu.getImage().getScaledInstance(140, 36, Image.SCALE_SMOOTH);
-        appIconMenu = new ImageIcon(appImageMenu);
-        JLabel appLabelMenu = new JLabel(appIconMenu);
-        appLabelMenu.setHorizontalAlignment(SwingConstants.CENTER);
-
-        appLabelMenu.setBounds(0, 10, 180, 34);
-        add(appLabelMenu, Integer.valueOf(1));
-
-        String[] buttonInfo = {"/images/Core/user.png", "Perfil", "/images/Core/hash.png", "Etiquetas", "/images/Core/sliders.png", "Ajustes", "/images/Core/log-out.png", "Logout"};
-
-        for (int i = 0; i < buttonInfo.length; i += 2) {
-            JButton button = createNavButton(buttonInfo[i], buttonInfo[i + 1]);
-            button.setBounds(-30, 80 + i * 45, 180, 45);
-            add(button, Integer.valueOf(2));
-        }
-    }
-
-    private JButton createNavButton(String iconPath, String label) {
-        JButton button = new JButton();
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorderPainted(false);
-        button.setFocusable(false);
-
-        ImageIcon icon = new ImageIcon(getClass().getResource(iconPath));
-        icon = new ImageIcon(icon.getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH));
-        Font font = new Font("Roboto", Font.PLAIN, 20);
-
-        JLabel labelComponent = new JLabel(label);
-        labelComponent.setFont(font);
-        labelComponent.setForeground(Color.decode("#00AAFF"));
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setOpaque(false);
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-        buttonPanel.add(new JLabel(icon));
-        buttonPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-        buttonPanel.add(labelComponent);
-
-        button.add(buttonPanel);
-
-        switch (label) {
-            case "Perfil":
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                    }
-                });
-                break;
-            case "Etiquetas":
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                    }
-                });
-                break;
-            case "Ajustes":
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        Settings settings = new Settings();
-                        settings.setVisible(true);
-                    }
-                });
-                break;
-            case "Logout":
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Crear un JOptionPane
-                        int response = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que quieres salir de la aplicación?", "Confirmar salida", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-
-                        // Verificar la respuesta del usuario
-                        if (response == JOptionPane.YES_OPTION) {
-                            LogIn login = new LogIn();
-                        }
-                    }
-                });
-                break;
-
-            default:
-                break;
-        }
-
-        return button;
     }
 }
 
@@ -411,6 +293,7 @@ public class Home extends JFrame {
         setSize(newWidth, newHeight);
         setLocationRelativeTo(null);
 
+        //---------------Configuracion mainPanel---------------//
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -427,6 +310,7 @@ public class Home extends JFrame {
             }
         };
 
+        // Configuración del botón "Búsqueda" (seacrhButton)
         JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/search.png")));
         searchButton.setPreferredSize(new Dimension(40, 40));
         searchButton.setContentAreaFilled(false);
@@ -434,9 +318,11 @@ public class Home extends JFrame {
         searchButton.setFocusable(false);
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        // Configuración del panel de búsqueda redondeado
         RoundedPanel searchPanel = new RoundedPanel(42);
         searchPanel.setPreferredSize(new Dimension(330, 30));
 
+        // Configuración del campo de búsqueda
         JTextField searchBar = new JTextField();
         searchBar.setOpaque(false);
         searchBar.setBorder(BorderFactory.createEmptyBorder());
@@ -446,9 +332,9 @@ public class Home extends JFrame {
 
         Font font = new Font("Verdana", Font.PLAIN, 18);
         searchBar.setFont(font);
-
         searchPanel.add(searchBar, BorderLayout.CENTER);
 
+        // Manejo de eventos del botón de búsqueda
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -456,43 +342,44 @@ public class Home extends JFrame {
                     String searchText = searchBar.getText();
                     JOptionPane.showMessageDialog(Home.this, "Searching for: " + searchText);
                 } catch (Exception ex) {
-                    // Manejo de excepciones relacionadas con la búsqueda
                     ex.printStackTrace();
                 }
             }
         });
 
-        Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/user-plus.png"));
+        // Configuración del botón "Agregar" (addButton)
+        Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/plus.png"));
         CircularButton addButton = new CircularButton(addButtonIcon);
-
         int addButtonX = getWidth() - 80 - 30;
         int addButtonY = getHeight() - 80 - 50;
         addButton.setBounds(addButtonX, addButtonY, 80, 80);
         addButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        // Manejo de eventos del botón agregar
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // Abre el formulario
                     dispose();
                     GestionContactos.main(new String[0]);
                 } catch (Exception ex) {
-                    // Manejo de excepciones relacionadas con la apertura del formulario
                     ex.printStackTrace();
                 }
             }
         });
         getLayeredPane().add(addButton, JLayeredPane.PALETTE_LAYER);
 
+        // Configuración de la lista de contactos (contactList)
         contactList = new ContactList();
         contactList.setBounds(20, 100, 520, 400);
         getContentPane().add(contactList);
 
+        // Configuración del menú lateral (sideMenu)
         sideMenu = new SideMenu();
         sideMenu.setBounds(-180, 0, 180, getHeight());
         getLayeredPane().add(sideMenu, JLayeredPane.PALETTE_LAYER);
 
+        // Configuración del botón de menú para desplegar el menú lateral
         JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/menu.png")));
         menuButton.setPreferredSize(new Dimension(40, 40));
         menuButton.setContentAreaFilled(false);
@@ -501,6 +388,7 @@ public class Home extends JFrame {
         menuButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         menuButton.setMargin(new Insets(5, 5, 5, 5));
 
+        // Manejo de eventos del botón de menú
         menuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -525,17 +413,20 @@ public class Home extends JFrame {
             }
         });
 
+        // Configuración del panel superior (topPanel)
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
         topPanel.add(menuButton, BorderLayout.WEST);
         topPanel.add(searchButton, BorderLayout.CENTER);
         topPanel.add(searchPanel, BorderLayout.EAST);
 
+        // Agregar componentes al panel principal (mainPanel)
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
         getContentPane().add(mainPanel);
         setVisible(true);
 
+        // Manejo de redimensionamiento de la ventana
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
