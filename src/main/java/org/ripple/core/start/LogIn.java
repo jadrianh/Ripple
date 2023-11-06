@@ -1,6 +1,6 @@
 package org.ripple.core.start;
 
-import org.ripple.core.Home;
+import org.ripple.core.main.Home;
 import org.ripple.core.Registro;
 
 import javax.imageio.ImageIO;
