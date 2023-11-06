@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import org.ripple.core.Profile;
+import org.ripple.core.Settings;
 
 public class SideMenu extends JLayeredPane {
     private boolean menuVisible = false;
@@ -92,8 +94,8 @@ public class SideMenu extends JLayeredPane {
                 button.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        Tags tags = new Tags();
-                        tags.setVisible(true);
+                        //Tags tags = new Tags();
+                      //  tags.setVisible(true);
                     }
                 });
                 break;

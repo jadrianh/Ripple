@@ -15,11 +15,12 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.ripple.core.Profile;
 import org.ripple.core.start.LogIn;
-
 
 //////////// Clase que representa un contacto ////////////
 class Contact {
+
     private String name;
     private String phoneNumber;
     private BufferedImage profileImage;
@@ -46,17 +47,19 @@ class Contact {
     public String getName() {
         return name;
     }
+
     public String getPhoneNumber() {
         return phoneNumber;
     }
+
     public BufferedImage getProfileImage() {
         return profileImage;
     }
 }
 
-
 //////////// Panel que representa visualmente un contacto ////////////
 class ContactPanel extends JPanel {
+
     private final Contact contact;
 
     // Constructor de la clase ContactPanel
@@ -125,6 +128,7 @@ class ContactPanel extends JPanel {
 
 //////////// Panel que muestra una lista de contactos ////////////
 class ContactList extends JPanel {
+
     private List<Contact> contacts;
     private int visibleContacts;
     private int scrollPosition;
@@ -143,73 +147,48 @@ class ContactList extends JPanel {
 
     private void loadContactsFromDatabase() {
         // Carga contactos desde una base de datos (MySQL)
-        CConexion conexion = new CConexion();
-        Connection dbConnection = conexion.establecerConection();
-
-        if (dbConnection != null) {
-            try {
-                String query = "SELECT name, phoneNumber FROM contacts";
-                PreparedStatement statement = dbConnection.prepareStatement(query);
-                ResultSet result = statement.executeQuery();
-
-                while (result.next()) {
-                    String name = result.getString("name");
-                    String phoneNumber = result.getString("phoneNumber");
-                    Contact contact = new Contact(name, phoneNumber, null); // No hay imagen por ahora
-                    contacts.add(contact);
-                }
-
-                result.close();
-                statement.close();
-                dbConnection.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    public void setScrollPosition(int scrollPosition) {
-        this.scrollPosition = scrollPosition;
-        updateContactPanels();
-    }
-
-    private void updateContactPanelsFromDatabase() {
-        removeAll();
+        Connection dbConnection = null;
 
         try {
-            String jdbcURL = "jdbc:mysql://localhost:3306/c";
+            String jdbcURL = "jdbc:mysql://localhost:3307/rippledb";
             String user = "root";
             String password = "Ragnar2105";
 
-            Connection connection = DriverManager.getConnection(jdbcURL, user, password);
-            Statement statement = connection.createStatement();
+            dbConnection = DriverManager.getConnection(jdbcURL, user, password);
 
-            String selectQuery = "SELECT name, phoneNumber FROM contacts";
-            ResultSet resultSet = statement.executeQuery(selectQuery);
+            if (dbConnection != null) {
+                Statement statement = dbConnection.createStatement();
+                String selectQuery = "SELECT c.firstName, p.phoneNumber FROM Contacts c INNER JOIN Phone p ON c.firstName = p.phoneNumber";
+                ResultSet resultSet = statement.executeQuery(selectQuery);
 
-            while (resultSet.next()) {
-                String name = resultSet.getString("name");
-                String phoneNumber = resultSet.getString("phoneNumber");
+                while (resultSet.next()) {
+                    String firstName = resultSet.getString("firstName");
+                    String phoneNumber = resultSet.getString("phoneNumber");
 
-                Contact contact = new Contact(name, phoneNumber, null); // You may load profile image if available
-                contacts.add(contact);
+                    Contact contact = new Contact(firstName, phoneNumber, null); // No hay imagen por ahora
+                    contacts.add(contact);
+                }
+
+                resultSet.close();
+                statement.close();
             }
 
-            resultSet.close();
-            statement.close();
-            connection.close();
-        } catch (Exception e) {
-            // Manejo de excepciones relacionadas con la base de datos
-            System.err.println("Se ha producido un error al conectar la base datos: " + e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (dbConnection != null) {
+                try {
+                    dbConnection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+    }
 
-        for (Contact contact : contacts) {
-            ContactPanel contactPanel = new ContactPanel(contact);
-            add(contactPanel);
-            add(Box.createRigidArea(new Dimension(0, 10))); // Corrección: Agregar un paréntesis adicional y punto y coma al final
-        }
-
-        revalidate();
-        repaint();
+    public void setScrollPosition(int scrollPosition) {
+        this.scrollPosition = scrollPosition;
+        updateContactPanels();
     }
 
     private void updateContactPanels() {
@@ -218,7 +197,7 @@ class ContactList extends JPanel {
         for (int i = scrollPosition; i < Math.min(scrollPosition + visibleContacts, contacts.size()); i++) {
             Contact contact = contacts.get(i);
             ContactPanel contactPanel = new ContactPanel(contact);
-            contactPanel.setLocation(20 + 100 * i, 100);
+            contactPanel.setLocation(20, 100 * i); // Corrección: Cambiar 100 * i a 100
             add(contactPanel);
 
             if (i < visibleContacts - 1) {
@@ -233,6 +212,7 @@ class ContactList extends JPanel {
 
 //////////// Creacion de la clase RoundedPanel ////////////
 class RoundedPanel extends JPanel {
+
     private final int arc;
 
     // Constructor de la clase RoundedPanel
@@ -258,6 +238,7 @@ class RoundedPanel extends JPanel {
 }
 
 public class Home extends JFrame {
+
     private Desface desplace;
     private boolean menuVisible = false;
     private SideMenu sideMenu;
