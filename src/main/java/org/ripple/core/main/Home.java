@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.ripple.core.Profile;
+import org.ripple.core.main.Profile;
 import org.ripple.core.start.LogIn;
 
 //////////// Clase que representa un contacto ////////////
@@ -292,7 +292,7 @@ public class Home extends JFrame {
         };
 
         // Configuración del botón "Búsqueda" (seacrhButton)
-        JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/search.png")));
+        JButton searchButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/drawable-action/search.png")));
         searchButton.setPreferredSize(new Dimension(40, 40));
         searchButton.setContentAreaFilled(false);
         searchButton.setBorderPainted(false);
@@ -329,7 +329,7 @@ public class Home extends JFrame {
         });
 
         // Configuración del botón "Agregar" (addButton)
-        Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/plus.png"));
+        Icon addButtonIcon = new ImageIcon(getClass().getResource("/images/Core/drawable-action/plus.png"));
         CircularButton addButton = new CircularButton(addButtonIcon);
         int addButtonX = getWidth() - 80 - 30;
         int addButtonY = getHeight() - 80 - 50;
@@ -361,7 +361,7 @@ public class Home extends JFrame {
         getLayeredPane().add(sideMenu, JLayeredPane.PALETTE_LAYER);
 
         // Configuración del botón de menú para desplegar el menú lateral
-        JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/menu.png")));
+        JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/Core/drawable-action/menu.png")));
         menuButton.setPreferredSize(new Dimension(40, 40));
         menuButton.setContentAreaFilled(false);
         menuButton.setBorderPainted(false);

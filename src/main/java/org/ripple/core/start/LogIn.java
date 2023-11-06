@@ -1,5 +1,6 @@
 package org.ripple.core.start;
 
+import org.ripple.CConexion;
 import org.ripple.core.main.Home;
 import org.ripple.core.Registro;
 
@@ -10,6 +11,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import static org.ripple.CConexion.conection;
 
 public class LogIn extends JFrame {
 
@@ -151,11 +156,19 @@ public class LogIn extends JFrame {
         logInPanel.add(rememberCheckBox, constraints);
 
         JButton loginButton = new JButton("Login");
-        
+
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
+
+                // Obtener el ID de usuario del usernameField
+                String username = usernameField.getText();
+                int userId = getUserIdFromUsername(username);
+
+                // Guardar el ID de usuario en CConexion
+                CConexion conexion = new CConexion();
+                conexion.setUserId(userId);
 
                 Home homeForm = new Home();
                 homeForm.setVisible(true);
@@ -206,6 +219,25 @@ public class LogIn extends JFrame {
         });
 
         return logInPanel;
+    }
+
+    public int getUserIdFromUsername(String username) {
+        int userId = -1;
+
+        try {
+            String query = "SELECT id FROM Users WHERE username = ?";
+            PreparedStatement statement = conection.prepareStatement(query);
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                userId = resultSet.getInt("id");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error retrieving user ID");
+        }
+
+        return userId;
     }
 
     private PlaceholderTextField createTextField(String placeholderText) {

@@ -61,8 +61,8 @@ public class Register extends JFrame {
         constraints.gridwidth = 2;
         registroPanel.add(titleLabel, constraints);
 
-        ImageIcon usernameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/at-sign.png"))
-                .getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        ImageIcon usernameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/at-sign.png"))
+                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
         JLabel usernameIconLabel = new JLabel(usernameIcon);
         constraints.gridy = 2;
         constraints.gridx = 0;
@@ -74,8 +74,8 @@ public class Register extends JFrame {
         constraints.gridwidth = 1;
         registroPanel.add(usernameField, constraints);
 
-        ImageIcon nameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/user.png"))
-                .getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        ImageIcon nameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/user.png"))
+                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
         JLabel nameIconLabel = new JLabel(nameIcon);
         constraints.gridy = 3;
         constraints.gridx = 0;
@@ -87,8 +87,8 @@ public class Register extends JFrame {
         constraints.gridwidth = 1;
         registroPanel.add(nameField, constraints);
 
-        ImageIcon phoneNumberIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/phone.png"))
-                .getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        ImageIcon phoneNumberIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-icons/phone.png"))
+                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
         JLabel phoneNumberLabel = new JLabel(phoneNumberIcon);
         constraints.gridy = 4;
         constraints.gridx = 0;
@@ -108,7 +108,7 @@ public class Register extends JFrame {
         panelConstraints.weightx = 1;
 
         phoneNumberComboBox = new JComboBox<>(new String[]{"+1", "+86", "+91", "+44", "+81", "+49", "+7", "+55", "+33", "+61", "+52", "+82", "+34", "+39", "+52", "+20", "+27", "+351", "+503", "+502", "+507", "+371", "+569"});
-        phoneNumberComboBox.setPreferredSize(new Dimension(60, 20));
+        phoneNumberComboBox.setPreferredSize(new Dimension(55, 20));
         phoneNumberComboBox.setBackground(Color.WHITE);
         phoneNumberComboBox.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         phoneNumberComboBox.setUI(new BasicComboBoxUI() {
@@ -131,8 +131,8 @@ public class Register extends JFrame {
         registroPanel.add(phoneNumberPanel, constraints);
         /////////////////////////////////////////////////
 
-        ImageIcon passwordIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/lock.png"))
-                .getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        ImageIcon passwordIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/lock.png"))
+                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
         JLabel passwordIconLabel = new JLabel(passwordIcon);
         constraints.gridx = 0;
         constraints.gridy = 6;
@@ -144,8 +144,8 @@ public class Register extends JFrame {
         constraints.gridwidth = 1;
         registroPanel.add(passwordField, constraints);
 
-        ImageIcon passwordConfirmIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/lock.png"))
-                .getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        ImageIcon passwordConfirmIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/Core/drawable-indication/lock.png"))
+                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
         JLabel confirmPasswordIconLabel = new JLabel(passwordConfirmIcon);
         constraints.gridx = 0;
         constraints.gridy = 7;

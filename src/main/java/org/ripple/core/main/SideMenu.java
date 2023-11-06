@@ -8,8 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.ripple.core.Profile;
-import org.ripple.core.Settings;
+import org.ripple.core.main.Profile;
+import org.ripple.core.main.settings.Settings;
 
 public class SideMenu extends JLayeredPane {
     private boolean menuVisible = false;
