@@ -1,51 +1,41 @@
 package org.ripple.core.main;
 
 import desplazable.Desface;
-import org.ripple.CConexion;
-import org.ripple.core.GestionContactos;
-import org.ripple.core.start.LogIn;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.ripple.core.main.Profile;
-import org.ripple.core.start.LogIn;
+import javax.swing.*;
+import org.ripple.core.GestionContactos;
 
-//////////// Clase que representa un contacto ////////////
 class Contact {
 
-    private String name;
+    private String firstName;
+    private String lastName;
     private String phoneNumber;
     private BufferedImage profileImage;
 
-    // Constructor de la clase Contact
-    public Contact(String name, String phoneNumber, String profileImagePath) {
-        // Inicializa un contacto con su nombre, número de teléfono y una imagen de perfil
-        this.name = name;
+    public Contact(String firstName, String lastName, String phoneNumber, BufferedImage profileImage) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.phoneNumber = phoneNumber;
-        loadProfileImage(profileImagePath);
+        this.profileImage = profileImage;
     }
 
-    private void loadProfileImage(String imagePath) {
-        // Carga la imagen de perfil desde un archivo
-        try {
-            profileImage = ImageIO.read(getClass().getResource(imagePath));
-        } catch (IOException e) {
-            // Manejo de errores si la carga de la imagen falla
-            e.printStackTrace();
-        }
+    public String getFirstName() {
+        return firstName;
     }
 
-    // Métodos para obtener información del contacto
-    public String getName() {
-        return name;
+    public String getLastName() {
+        return lastName;
     }
 
     public String getPhoneNumber() {
@@ -57,7 +47,6 @@ class Contact {
     }
 }
 
-//////////// Panel que representa visualmente un contacto ////////////
 class ContactPanel extends JPanel {
 
     private final Contact contact;
@@ -69,11 +58,7 @@ class ContactPanel extends JPanel {
         setOpaque(false);
 
         addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(null, "Clickeo sobre: " + contact.getName());
-                Profile profile = new Profile();
-            }
+            // Agrega acciones de clic si es necesario
         });
     }
 
@@ -105,7 +90,7 @@ class ContactPanel extends JPanel {
         // Formato de elemento: Nombre
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.PLAIN, 16));
-        String name = contact.getName();
+        String name = contact.getFirstName();
         int textX = imageSize + 40;
         int textY = height / 4 + g2d.getFontMetrics().getHeight() / 2;
         g2d.drawString(name, textX, textY);
@@ -126,7 +111,6 @@ class ContactPanel extends JPanel {
     }
 }
 
-//////////// Panel que muestra una lista de contactos ////////////
 class ContactList extends JPanel {
 
     private List<Contact> contacts;
@@ -134,40 +118,51 @@ class ContactList extends JPanel {
     private int scrollPosition;
 
     // Constructor de la clase ContactList
-    public ContactList() {
+     public ContactList() {
         // Inicializa la lista de contactos y otros atributos
         this.contacts = new ArrayList<>();
         this.scrollPosition = 0;
         this.visibleContacts = 4;
         setOpaque(false);
+
+        // Cambia de FlowLayout a BoxLayout con orientación vertical
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
         loadContactsFromDatabase(); // Cargar contactos desde la base de datos
         updateContactPanels();
+        setScrollPosition(0);  // Asegúrate de llamar a setScrollPosition después de cargar los contactos
     }
-
     private void loadContactsFromDatabase() {
         // Carga contactos desde una base de datos (MySQL)
         Connection dbConnection = null;
 
         try {
-            String jdbcURL = "jdbc:mysql://localhost:3307/rippleDB";
+            String jdbcURL = "jdbc:mysql://localhost:3307/rippledb";
             String user = "root";
-            String password = "RooT1";
+            String password = "Ragnar2105";
 
             dbConnection = DriverManager.getConnection(jdbcURL, user, password);
 
             if (dbConnection != null) {
                 Statement statement = dbConnection.createStatement();
-                String selectQuery = "SELECT c.firstName, p.phoneNumber FROM Contacts c INNER JOIN Phone p ON c.firstName = p.phoneNumber";
+                // Corrige la consulta SQL según la estructura de tus tablas
+                String selectQuery = "SELECT c.idContacts, c.firstName, c.lastName, p.phoneNumber "
+                        + "FROM Contacts c "
+                        + "JOIN Phone_Contacts pc ON c.idContacts = pc.idContacts "
+                        + "JOIN Phone p ON pc.idPhone = p.idPhone";
                 ResultSet resultSet = statement.executeQuery(selectQuery);
 
                 while (resultSet.next()) {
                     String firstName = resultSet.getString("firstName");
+                    String lastName = resultSet.getString("lastName");
                     String phoneNumber = resultSet.getString("phoneNumber");
 
-                    Contact contact = new Contact(firstName, phoneNumber, null); // No hay imagen por ahora
+                    Contact contact = new Contact(firstName, lastName, phoneNumber, null); // No hay imagen por ahora
                     contacts.add(contact);
                 }
+
+                System.out.println("Number of contacts loaded: " + contacts.size());
+
 
                 resultSet.close();
                 statement.close();
@@ -197,7 +192,6 @@ class ContactList extends JPanel {
         for (int i = scrollPosition; i < Math.min(scrollPosition + visibleContacts, contacts.size()); i++) {
             Contact contact = contacts.get(i);
             ContactPanel contactPanel = new ContactPanel(contact);
-            contactPanel.setLocation(20, 100 * i); // Corrección: Cambiar 100 * i a 100
             add(contactPanel);
 
             if (i < visibleContacts - 1) {
