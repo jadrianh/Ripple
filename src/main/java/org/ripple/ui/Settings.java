@@ -1,5 +1,6 @@
 package org.ripple.ui;
 
+import org.ripple.util.ChangePasswordDialog;
 import org.ripple.util.CustomFontManager;
 import org.ripple.util.DeleteDialog;
 

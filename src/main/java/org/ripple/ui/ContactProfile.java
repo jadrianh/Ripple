@@ -1,36 +1,22 @@
 package org.ripple.ui;
 
-import org.ripple.util.CustomFontManager;
+import org.ripple.entities.PhoneNumber;
+import org.ripple.util.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.RoundRectangle2D;
-import java.net.URI;
 
 public class ContactProfile extends JFrame {
-    public ContactProfile() {
+    private int iconSize = 32;
+    public ContactProfile(){
         initializeUI();
-    }
-
-    private static void applyQualityRenderingHints(Graphics2D g2d) {
-        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
     }
 
     private void initializeUI() {
         //--------------Configuracion principal--------------//
         setTitle("Perfil del contacto");
         setMinimumSize(new Dimension(520, 980));
-        setLayout(new BorderLayout(0, 100));
+        setLayout(null);
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 getClass().getResource("/images/drawable-icons/icon.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -67,280 +53,182 @@ public class ContactProfile extends JFrame {
                 g2d.fill(new Rectangle(0, 0, getWidth(), getHeight()));
             }
         };
+        mainPanel.setPreferredSize(new Dimension(520, 190));
         mainPanel.setLayout(new BorderLayout());
+        //mainPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        // Agregar el nuevo panel blanco con margen
-        JPanel whitePanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                int arcWidth = 60;
-                int arcHeight = 60;
-                RoundRectangle2D roundRect = new RoundRectangle2D.Float(
-                        0, 0, getWidth(), getHeight(), arcWidth, arcHeight);
-
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setColor(Color.WHITE);
-                g2d.fill(roundRect);
-            }
-        };
-        whitePanel.setOpaque(false);
-
-        int margin = 30;
+        int margin = 10;
         mainPanel.setBorder(BorderFactory.createEmptyBorder(margin, margin, margin, margin));
+
+        JPanel whitePanel = new JPanel();
+        whitePanel.setPreferredSize(new Dimension(520, 860));
+        whitePanel.setBackground(Color.WHITE);
 
         // Crear el panel para los botones en la parte superior
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setOpaque(false);
 
-        // Crear etiquetas (JLabels) con imágenes y establecer su tamaño
-        JButton backButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-navigation/chevron-left.png")));
-        backButton.setPreferredSize(new Dimension(60, 60));
-        backButton.setOpaque(false);
-        backButton.setFocusable(false);
-        backButton.setContentAreaFilled(false);
-        backButton.setBorderPainted(false);
+        ClickEffectButton backButton = new ClickEffectButton("/images/drawable-navigation/chevron-left-alt.png", 44, 44);
 
-        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Home home = new Home();
-                dispose();
-            }
+        backButton.addActionListener(e -> {
+            Home home = new Home();
+            dispose();
         });
 
-        JButton trashButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-action/trash.png")));
-        trashButton.setPreferredSize(new Dimension(60, 60));
-        trashButton.setOpaque(true);
-        trashButton.setFocusable(false);
-        trashButton.setContentAreaFilled(false);
-        trashButton.setBorderPainted(false);
-
-        trashButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        trashButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Show a confirmation dialog
-                int response = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas eliminar este contacto?", "Confirmacion", JOptionPane.YES_NO_OPTION);
-
-                // Check the user's response
-                if (response == JOptionPane.YES_OPTION) {
-                    // The user clicked Yes
-                } else if (response == JOptionPane.NO_OPTION) {
-                    // The user clicked No
-                }
-            }
-        });
-
-
-        JButton editButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-action/edit.png")));
-        editButton.setPreferredSize(new Dimension(60, 60));
-        editButton.setOpaque(true);
-        editButton.setFocusable(false);
-        editButton.setContentAreaFilled(false);
-        editButton.setBorderPainted(false);
-
-        editButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Add your code here to handle the edit button action
-            }
-        });
-
-        // Configurar la disposición del panel de botones
+        // Configurar la disposición del panel de botones izquierdo
         JPanel leftButtonPanel = new JPanel();
         leftButtonPanel.add(backButton);
         leftButtonPanel.setOpaque(false);
 
+        // Agregar botón de edición en la esquina superior derecha
+        ClickEffectButton editButton = new ClickEffectButton("/images/drawable-action/edit-alt.png", 44, 44);
+
+        editButton.addActionListener(e -> {
+            // Lógica de edición
+            System.out.println("Botón de edición presionado");
+        });
+
+        // Agregar botón de edición en la esquina superior derecha
+        ClickEffectButton trashButton = new ClickEffectButton("/images/drawable-action/trash-alt.png", 44, 44);
+
+        trashButton.addActionListener(e -> {
+            // Muestra un cuadro de diálogo de confirmación
+            int response = JOptionPane.showConfirmDialog(
+                    null, "¿Estás seguro de que deseas eliminar este contacto?", "Confirmación", JOptionPane.YES_NO_OPTION);
+
+            // Verifica la respuesta del usuario
+            if (response == JOptionPane.YES_OPTION) {
+                // El usuario hizo clic en Sí
+            } else if (response == JOptionPane.NO_OPTION) {
+                // El usuario hizo clic en No
+            }
+        });
+
+        // Configurar la disposición del panel de botones derecho
         JPanel rightButtonPanel = new JPanel();
-        rightButtonPanel.add(trashButton);
         rightButtonPanel.add(editButton);
+        rightButtonPanel.add(trashButton);
         rightButtonPanel.setOpaque(false);
 
-        buttonPanel.add(leftButtonPanel, BorderLayout.WEST);
-        buttonPanel.add(rightButtonPanel, BorderLayout.EAST);
+        // Crear una imagen de ejemplo (reemplázala con tu lógica de carga de imágenes)
+        Image profileImage = new ImageIcon(getClass().getResource("/images/drawable-pictures/steamuserimages-a.akamaihd.gif")).getImage();
 
-        // Crea el contactPanel
-        JPanel contactPanel = new JPanel();
-        contactPanel.setLayout(new BoxLayout(contactPanel, BoxLayout.Y_AXIS));
-        contactPanel.setOpaque(false);
+        // Crear el panel de imagen con bordes redondeados
+        PicturePanel picturePanel = new PicturePanel(profileImage, 180, 180);
+        picturePanel.setOpaque(false);
 
-        JLabel titleLabel = new JLabel("Perfil");
-        titleLabel.setFont(CustomFontManager.getCustomFontMedium(26, false));
-        titleLabel.setForeground(Color.decode("#28282B"));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Configurar la capa del PicturePanel y su posición
+        int xPosition = 30;
+        int yPosition = 150;
+        JLayeredPane layeredPane = getLayeredPane();
+        layeredPane.add(picturePanel, JLayeredPane.PALETTE_LAYER);
+        picturePanel.setBounds(xPosition, yPosition, 180, 180);
 
-        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/images/drawable-pictures/profile00.png"));
-        Image image = imageIcon.getImage();
-        Image newImage = image.getScaledInstance(182, 182,  java.awt.Image.SCALE_SMOOTH);
-        final ImageIcon finalImageIcon = new ImageIcon(newImage);
+        // Crear JLabels
+        JLabel nameLabel = new JLabel("Nombre" + " " + "Apellido");
+        nameLabel.setFont(CustomFontManager.getCustomFontMedium(26, true));
+        JLabel nickNameLabel = new JLabel("Nickname");
+        nickNameLabel.setFont(CustomFontManager.getCustomFont(20, false));
 
-        JLabel profilePicLabel = new JLabel(finalImageIcon);
-        profilePicLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Image companyImage = new ImageIcon(getClass().getResource("/images/drawable-indication/briefcase.png")).getImage();
+        Image companyIconImage = companyImage.getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
+        JLabel companyIcon = new JLabel(new ImageIcon(companyIconImage));
 
-        JLabel contactNameLabel = new JLabel("Susana Navarro");
-        contactNameLabel.setFont(new Font("Verdana", Font.BOLD, 22));
-        contactNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel companyLabel = new JLabel("Empresa");
+        companyLabel.setFont(CustomFontManager.getCustomFont(20, false));
 
-        JLabel phoneNumberLabel = new JLabel("+503 7519-2425");
-        phoneNumberLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
-        phoneNumberLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Image birthdayImage = new ImageIcon(getClass().getResource("/images/drawable-indication/gift.png")).getImage();
+        Image birthdayIconImage = birthdayImage.getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
+        JLabel birthdayIcon = new JLabel(new ImageIcon(birthdayIconImage));
 
-        JLabel birthDayLabel = new JLabel("24/09/98");
-        birthDayLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
-        birthDayLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel birthdayLabel = new JLabel("12/09/2003");
+        birthdayLabel.setFont(CustomFontManager.getCustomFont(20, false));
 
-        JLabel addressLabel = new JLabel("Carretera Comalapa, Calle Miramar, Col. Montecristo, Casa No#26");
-        addressLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
-        addressLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JPanel addressPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                int arcWidth = 60;
-                int arcHeight = 60;
-                RoundRectangle2D roundRect = new RoundRectangle2D.Float(
-                        0, 0, getWidth(), getHeight(), arcWidth, arcHeight);
-
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setColor(Color.LIGHT_GRAY);
-                g2d.fill(roundRect);
-            }
-        };
-
+        // Crear un panel redondeado para la dirección
+        RoundedPanel addressPanel = new RoundedPanel(50);
         addressPanel.setLayout(new BorderLayout());
-        addressPanel.setOpaque(false);
-        addressPanel.setPreferredSize(new Dimension(400, 70));
-        addressPanel.setMaximumSize(new Dimension(460, 80));
+        addressPanel.setPreferredSize(new Dimension(240, 240));
+        addressPanel.setBackground(Color.decode("#E5E4E2"));
+
+        // Añadir un JLabel para la dirección con saltos de línea
+        JLabel addressLabel = new JLabel("<html>Dirección Línea 1<br>Dirección Línea 2</html>");
+        addressLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        addressLabel.setVerticalAlignment(SwingConstants.NORTH);
         addressPanel.add(addressLabel, BorderLayout.CENTER);
 
-        // Crear un nuevo panel con fondo azul
-        JPanel socialMediaPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                int arcWidth = 60; // Ajusta el radio de las esquinas redondeadas
-                int arcHeight = 60; // Ajusta el radio de las esquinas redondeadas
-                RoundRectangle2D roundRect = new RoundRectangle2D.Float(
-                        0, 0, getWidth(), getHeight(), arcWidth, arcHeight);
+        nameLabel.setBounds(240, 220, 300, 30);
+        nickNameLabel.setBounds(240, 250, 200, 30);
+        companyIcon.setBounds(30, 430, iconSize, iconSize);
+        companyLabel.setBounds(75, 430, 160, 30);
+        birthdayIcon.setBounds(30, 470, iconSize, iconSize);
+        birthdayLabel.setBounds(75, 470, 160, 30);
+        addressPanel.setBounds(240, 350, 240, 240);
 
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setColor(Color.decode("#00AAFF"));
-                g2d.fill(roundRect);
-            }
-        };
-        socialMediaPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        socialMediaPanel.setPreferredSize(new Dimension(400, 90));
-        socialMediaPanel.setMaximumSize(new Dimension(400, 90));
-        socialMediaPanel.setOpaque(false);
+        PhoneNumber[] phoneNumbers = PhoneNumber.getSamplePhoneNumbers();
 
-        // Crear y configurar botones individuales
-        JButton mailButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-icons/mail.png")));
-        JButton facebookButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-icons/facebook.png")));
-        JButton instagramButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-icons/instagram.png")));
-        JButton whatsappButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-icons/whatsapp.png")));
-        JButton twitterButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-icons/twitter.png")));
+        int yOffset = 350;
+        for (PhoneNumber phone : phoneNumbers) {
+            // Agregar el ícono del teléfono
+            Image phoneImage = new ImageIcon(getClass().getResource("/images/drawable-indication/phone.png")).getImage();
+            Image scaledIconImage = phoneImage.getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
+            JLabel phoneIcon = new JLabel(new ImageIcon(scaledIconImage));
+            phoneIcon.setBounds(30, yOffset, iconSize, iconSize);
+            add(phoneIcon);
 
-        // Crear un ActionListener para los botones de redes sociales
-        ActionListener socialMediaButtonListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String url = null;
+            // Agregar el número de teléfono
+            JLabel phoneLabel = new JLabel(phone.getPhoneSuffix() + " " + phone.getPhoneNumber());
+            phoneLabel.setFont(CustomFontManager.getCustomFont(20, false));
+            phoneLabel.setBounds(70, yOffset, 160, 30);
+            add(phoneLabel);
 
-                if (e.getSource() == mailButton) {
-                    url = "https://www.ejemplo.com/correo";
-                } else if (e.getSource() == facebookButton) {
-                    url = "https://www.facebook.com/ejemplo";
-                } else if (e.getSource() == instagramButton) {
-                    url = "https://www.instagram.com/ejemplo";
-                } else if (e.getSource() == whatsappButton) {
-                    url = "https://api.whatsapp.com/send?phone=NUMERO_TELEFONO";
-                } else if (e.getSource() == twitterButton) {
-                    url = "https://twitter.com/ejemplo";
-                }
-
-                if (url != null) {
-                    try {
-                        Desktop.getDesktop().browse(new URI(url));
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-        };
-
-        mailButton.setBorderPainted(false);
-        mailButton.setContentAreaFilled(false);
-        mailButton.setFocusPainted(false);
-
-        facebookButton.setBorderPainted(false);
-        facebookButton.setContentAreaFilled(false);
-        facebookButton.setFocusPainted(false);
-
-        instagramButton.setBorderPainted(false);
-        instagramButton.setContentAreaFilled(false);
-        instagramButton.setFocusPainted(false);
-
-        whatsappButton.setBorderPainted(false);
-        whatsappButton.setContentAreaFilled(false);
-        whatsappButton.setFocusPainted(false);
-
-        twitterButton.setBorderPainted(false);
-        twitterButton.setContentAreaFilled(false);
-        twitterButton.setFocusPainted(false);
-
-        // Asignar ActionListener a cada botón
-        mailButton.addActionListener(socialMediaButtonListener);
-        facebookButton.addActionListener(socialMediaButtonListener);
-        instagramButton.addActionListener(socialMediaButtonListener);
-        whatsappButton.addActionListener(socialMediaButtonListener);
-        twitterButton.addActionListener(socialMediaButtonListener);
-
-        // Actualizar el bucle para agregar botones al socialMediaPanel
-        for (JButton button : new JButton[]{mailButton, facebookButton, instagramButton, whatsappButton, twitterButton}) {
-            JPanel socialMediaButtonPanel = new JPanel() {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    int size = Math.min(getWidth(), getHeight());
-                    Graphics2D g2d = (Graphics2D) g;
-                    g2d.setColor(Color.WHITE);
-                    g2d.fill(new Ellipse2D.Double(0, 0, size, size));
-                }
-            };
-            socialMediaButtonPanel.setPreferredSize(new Dimension(60, 60));
-            socialMediaButtonPanel.setLayout(new BorderLayout());
-            socialMediaButtonPanel.setOpaque(false);
-
-            socialMediaButtonPanel.add(button, BorderLayout.CENTER);
-            socialMediaPanel.add(socialMediaButtonPanel);
+            // Incrementar el desplazamiento vertical para el siguiente conjunto de JLabel y JIcon
+            yOffset += 40;
         }
 
+        // Crear el panel de redes sociales
+        SocialNetworkPanel socialNetworkPanel = new SocialNetworkPanel();
+        socialNetworkPanel.setOpaque(false);
 
-        // Agregar el panel de botones en la parte superior del profilePanel
-        whitePanel.setLayout(new BorderLayout());
-        whitePanel.add(buttonPanel, BorderLayout.NORTH);
+        // Crear un JPanel contenedor para el panel de redes sociales
+        JPanel socialPanelContainer = new JPanel();
+        socialPanelContainer.setOpaque(false);
+        socialPanelContainer.add(socialNetworkPanel);
 
-        mainPanel.add(whitePanel, BorderLayout.CENTER);
+        // Agregar el panel contenedor al JLayeredPane
+        int xPositionForSocialPanel = 0; // Ajusta la posición según tus necesidades
+        int yPositionForSocialPanel = 510; // Ajusta la posición según tus necesidades
+        JLayeredPane socialLayeredPane = getLayeredPane();
+        socialLayeredPane.add(socialPanelContainer, JLayeredPane.PALETTE_LAYER);
+        socialPanelContainer.setBounds(xPositionForSocialPanel, yPositionForSocialPanel, 244, 150);
 
-        // Add the labels to the contact panel
-        contactPanel.add(titleLabel);
-        contactPanel.add(profilePicLabel);
-        contactPanel.add(contactNameLabel);
-        contactPanel.add(phoneNumberLabel);
-        contactPanel.add(birthDayLabel);
-        contactPanel.add(addressPanel);
-        contactPanel.add(socialMediaPanel);
 
-        whitePanel.add(contactPanel, BorderLayout.CENTER);
+        // Agregar los JLabels al JFrame
+        add(nameLabel);
+        add(nickNameLabel);
+        add(companyIcon);
+        add(companyLabel);
+        add(birthdayIcon);
+        add(birthdayLabel);
+        add(addressPanel);
 
-        getContentPane().add(mainPanel);
+        // Set layout for the main frame
+        setLayout(new BorderLayout());
+
+        // Agregar los paneles de botones al panel principal
+        buttonPanel.add(leftButtonPanel, BorderLayout.WEST);
+        buttonPanel.add(rightButtonPanel, BorderLayout.EAST);
+        mainPanel.add(buttonPanel, BorderLayout.NORTH);
+        add(mainPanel, BorderLayout.NORTH);
+        add(whitePanel, BorderLayout.SOUTH);
+
+        // Display the frame
         setVisible(true);
+    }
+
+    private void addSocialNetworkPanel(SocialNetworkPanel socialNetworkPanel) {
+        // Agregar el panel de redes sociales a tu diseño
+        // (Ajusta las coordenadas y tamaños según sea necesario)
+        socialNetworkPanel.setBounds(10, 10, 200, 240);
+        add(socialNetworkPanel);
     }
 }
