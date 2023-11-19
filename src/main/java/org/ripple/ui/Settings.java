@@ -1,16 +1,22 @@
 package org.ripple.ui;
 
-import org.ripple.util.ChangePasswordDialog;
+import ezvcard.Ezvcard;
+import ezvcard.VCard;
+import ezvcard.property.Birthday;
+import ezvcard.property.Photo;
 import org.ripple.util.CustomFontManager;
 import org.ripple.util.DeleteDialog;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Date;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import org.ripple.connection.CConexion;
 
 public class Settings extends JFrame {
 
@@ -73,33 +79,40 @@ public class Settings extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Process process = Runtime.getRuntime().exec("powershell.exe -ExecutionPolicy Bypass -File ./src/main/java/org/ripple/scripts/file_selector.ps1");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    String line;
-                    StringBuilder output = new StringBuilder();
-                    while ((line = reader.readLine()) != null) {
-                        output.append(line).append("\n");
+                    // Crear un JFileChooser
+                    JFileChooser fileChooser = new JFileChooser();
+
+                    // Agregar un filtro para mostrar solo archivos VCF
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos VCF (*.vcf)", "vcf");
+                    fileChooser.setFileFilter(filter);
+
+                    // Mostrar el cuadro de diálogo para seleccionar el archivo
+                    int result = fileChooser.showOpenDialog(Settings.this);
+
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        // Obtener el archivo seleccionado
+                        File selectedFile = fileChooser.getSelectedFile();
+
+                        // Verificar si la extensión del archivo es ".vcf"
+                        if (selectedFile.getName().toLowerCase().endsWith(".vcf")) {
+                            importarContactosDesdeVCF(selectedFile.getAbsolutePath());
+                        } else {
+                            JOptionPane.showMessageDialog(Settings.this, "Por favor, selecciona un archivo VCF válido.");
+                        }
                     }
-                    int exitCode = process.waitFor();
-                    if (exitCode == 0) {
-                        String selectedFile = output.toString().trim();
-                        // Hacer algo con el archivo seleccionado
-                        System.out.println("Selected file: " + selectedFile);
-                    } else {
-                        // Manejar error de ejecución de script PowerShell
-                        System.out.println("PowerShell script execution failed");
-                    }
-                } catch (IOException | InterruptedException ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
         }));
+        
         optionsPanel.add(createSeparator());
 
         optionsPanel.add(createButton(" Exportar Contactos", "/images/drawable-action/upload.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 2");
+               CConexion conexion = new CConexion();
+               conexion.exportarContactosVCF();
             }
         }));
         optionsPanel.add(createSeparator());
@@ -108,8 +121,6 @@ public class Settings extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Mostrar la ventana emergente para cambiar la contraseña
-                ChangePasswordDialog dialog = new ChangePasswordDialog(Settings.this);
-                dialog.setVisible(true);
             }
         }));
         optionsPanel.add(createSeparator());
@@ -189,5 +200,70 @@ public class Settings extends JFrame {
         separator.setPreferredSize(new Dimension(480, 1));
         separator.setForeground(Color.GRAY);
         return separator;
+    }
+    
+    private void importarContactosDesdeVCF(String filePath) {
+        try {
+            // Crear una instancia de CConexion
+            CConexion conexion = new CConexion();
+
+            // Parsear el archivo VCF
+            java.util.List<VCard> vcards = Ezvcard.parse(new File(filePath)).all();
+
+            // Verificar si hay contactos para importar
+            if (vcards.isEmpty()) {
+                JOptionPane.showMessageDialog(Settings.this, "El archivo VCF no contiene contactos.");
+                return;
+            }
+
+            // Importar cada VCard a la base de datos
+            for (VCard vcard : vcards) {
+                // Obtener los campos del VCard
+                String firstName = obtenerValor(vcard.getStructuredName().getGiven());
+                String lastName = obtenerValor(vcard.getStructuredName().getFamily());
+                String phoneContact = obtenerValor(vcard.getTelephoneNumbers().isEmpty() ? null : vcard.getTelephoneNumbers().get(0).getText());
+                String nickName = obtenerValor(vcard.getNickname() != null ? vcard.getNickname().getValues().toString() : null);
+                String company = obtenerValor(vcard.getOrganization() == null ? null : vcard.getOrganization().getValues().get(0));
+                String address = obtenerValor(vcard.getAddresses().isEmpty() ? null : vcard.getAddresses().get(0).getStreetAddress());
+                Date birthday = obtenerFecha(vcard.getBirthday());
+                String notes = obtenerValor(vcard.getNotes().isEmpty() ? null : vcard.getNotes().get(0).getValue());
+                byte[] photoData = obtenerDatosFoto(vcard);
+
+                // Guardar la información en la base de datos, incluyendo la foto
+                conexion.guardarContacto(firstName, lastName, phoneContact, nickName, company, address, birthday, notes, photoData);
+            }
+
+            JOptionPane.showMessageDialog(Settings.this, "Contactos importados correctamente desde el archivo VCF.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(Settings.this, "Error al importar contactos desde el archivo VCF: " + ex.getMessage());
+        }
+    }
+    
+    private String obtenerValor(String valor) {
+        return (valor != null) ? valor : "";
+    }
+
+    private Date obtenerFecha(Birthday birthday) {
+        if (birthday != null && birthday.getDate() != null && birthday.getDate().toString() != null) {
+            return Date.valueOf(birthday.getDate().toString());
+        }
+        return null;
+    }
+    
+    private byte[] obtenerDatosFoto(VCard vcard) {
+        try {
+            java.util.List<Photo> photos = vcard.getPhotos();
+            if (!photos.isEmpty()) {
+                Photo photo = photos.get(0);
+                byte[] photoData = photo.getData();
+                if (photoData != null && photoData.length > 0) {
+                    return photoData;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

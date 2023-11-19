@@ -2,17 +2,31 @@ package org.ripple.ui;
 
 import org.ripple.util.CustomFontManager;
 import org.ripple.util.PlaceholderTextField;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.border.MatteBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+import org.ripple.connection.CConexion;
 
 public class Register extends JFrame {
     private JComboBox<String> phoneSuffixCB;
+    private Connection connection;
 
     public Register() {
+        try {
+            CConexion conexionManager = new CConexion();
+            connection = conexionManager.establecerConection();
+            if (connection == null) {
+                JOptionPane.showMessageDialog(null, "No se pudo establecer la conexión a la Base de Datos");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         initializeUI();
     }
 
@@ -33,7 +47,7 @@ public class Register extends JFrame {
 
         int screenWidth = mode.getWidth();
         int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight - 42);
+        int smallerDimension = Math.min(screenWidth, screenHeight);
 
         int newWidth = smallerDimension * 520 / 980;
         int newHeight = smallerDimension;
@@ -108,6 +122,7 @@ public class Register extends JFrame {
         constraints.gridwidth = 1;
         registroPanel.add(nameField, constraints);
 
+        
         ImageIcon lastNameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/drawable-indication/users.png"))
                 .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
         JLabel lastNameLabel = new JLabel(lastNameIcon);
@@ -205,11 +220,25 @@ public class Register extends JFrame {
 
         registerButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                // Logica del boton registro
-                //
-                //
-                //
+                public void actionPerformed(ActionEvent e) {
+                
+                String username = usernameField.getText();
+                String name = nameField.getText();
+                String lastName = lastNameField.getText(); 
+                String phoneNumber = phoneSuffixCB.getSelectedItem().toString() + phoneNumberField.getText();
+                String password = passwordField.getText();
+
+                if (username.isEmpty() || name.isEmpty() || lastName.isEmpty() || phoneNumber.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(Register.this, "Por favor, complete todos los campos.");
+                } else {
+                    boolean registrationSuccess = insertarUsuario(username, password, name, lastName, phoneNumber); 
+
+                    if (registrationSuccess) {
+                        JOptionPane.showMessageDialog(Register.this, "Registro exitoso");
+                    } else {
+                        JOptionPane.showMessageDialog(Register.this, "Error al registrar el usuario.");
+                    }
+                }
             }
         });
 
@@ -245,8 +274,54 @@ public class Register extends JFrame {
     private PlaceholderTextField createTextField(String placeholderText) {
         PlaceholderTextField textField = new PlaceholderTextField(placeholderText);
         textField.setPreferredSize(new Dimension(300, 30));
-        textField.setBorder(null); // Eliminar el borde predeterminado
-        textField.setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY)); // Agregar una línea inferior
+        textField.setBorder(null); 
+        textField.setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY)); 
         return textField;
     }
+    
+    private boolean insertarUsuario(String usuario, String contrasena, String nombre, String apellido, String phoneNumber) {
+        try {
+            if (connection == null) {
+                System.out.println("Error: La conexión a la base de datos es nula.");
+                return false;
+            }
+
+            String verificarUsuario = "SELECT * FROM UserProfile WHERE username = ?";
+            PreparedStatement verificarUsuarioStatement = connection.prepareStatement(verificarUsuario);
+            verificarUsuarioStatement.setString(1, usuario);
+            ResultSet usuarioExistente = verificarUsuarioStatement.executeQuery();
+
+            if (usuarioExistente.next()) {
+                JOptionPane.showMessageDialog(Register.this, "Ya existe un usuario con ese nombre.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
+            String verificarContrasena = "SELECT * FROM UserProfile WHERE password = ?";
+            PreparedStatement verificarContrasenaStatement = connection.prepareStatement(verificarContrasena);
+            verificarContrasenaStatement.setString(1, contrasena);
+            ResultSet contrasenaExistente = verificarContrasenaStatement.executeQuery();
+
+            if (contrasenaExistente.next()) {
+                JOptionPane.showMessageDialog(Register.this, "Ya existe un usuario con esa contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
+            String consulta = "INSERT INTO UserProfile (username, password, name, lastName, phoneNumber, registerDate) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(consulta);
+            statement.setString(1, usuario);
+            statement.setString(2, contrasena);
+            statement.setString(3, nombre);
+            statement.setString(4, apellido);
+            statement.setString(5, phoneNumber);
+            statement.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
+
+            int filasAfectadas = statement.executeUpdate();
+
+            return filasAfectadas > 0;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
 }
+

@@ -3,7 +3,6 @@ package org.ripple.ui;
 import org.ripple.connection.CConexion;
 import org.ripple.util.CustomFontManager;
 import org.ripple.util.PlaceholderTextField;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
@@ -11,10 +10,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import static org.ripple.connection.CConexion.connection;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import static org.ripple.connection.CConexion.conection;
 
 public class LogIn extends JFrame {
 
@@ -39,7 +41,7 @@ public class LogIn extends JFrame {
 
         int screenWidth = mode.getWidth();
         int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight - 42);
+        int smallerDimension = Math.min(screenWidth, screenHeight);
 
         int newWidth = smallerDimension * 520 / 980;
         int newHeight = smallerDimension;
@@ -149,7 +151,7 @@ public class LogIn extends JFrame {
         }
 
         // Crear el nuevo CheckBox
-        JCheckBox rememberCheckBox = new JCheckBox("Recordar contraseña?");
+        JCheckBox rememberCheckBox = new JCheckBox("Recordar contraseña");
         rememberCheckBox.setBackground(Color.decode("#FFFFFF"));
         rememberCheckBox.setFont(new Font("Verdana", Font.PLAIN, 14));
         rememberCheckBox.setForeground(Color.decode("#00A7F8"));
@@ -179,22 +181,63 @@ public class LogIn extends JFrame {
 
 
         loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false);
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            loginButton.setEnabled(false); // Deshabilita el botón al inicio
 
-                // Obtener el ID de usuario del usernameField
-                String username = usernameField.getText();
-                int userId = getUserIdFromUsername(username);
+            String username = usernameField.getText();
+            String password = passwordField.getText();
 
-                // Guardar el ID de usuario en CConexion
-                CConexion conexion = new CConexion();
-                conexion.setUserId(userId);
+            int userId = getUserIdFromUsername(username);
 
-                Home homeForm = new Home();
-                homeForm.setVisible(true);
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(LogIn.this, "Por favor, ingresa tu usuario y contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
+                loginButton.setEnabled(true); // Habilita el botón nuevamente
+                return;
             }
+
+                Thread connectionThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            CConexion conexion = new CConexion();
+                            Connection cn = conexion.establecerConection();
+                            conexion.setUserId(userId);
+                            if (cn != null) {
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        boolean loginExitoso = conexion.consulta(cn, username, password);
+                                        if (loginExitoso) {
+                                            JOptionPane.showMessageDialog(LogIn.this, "Inicio de sesión exitoso!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                                            setVisible(false); // Oculta el formulario LogIn
+                                            Home homeForm = new Home(); // Crea una instancia del formulario Home
+                                            homeForm.setVisible(true); // Muestra el formulario Home
+                                        } else {
+                                            JOptionPane.showMessageDialog(LogIn.this, "Usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+                                        }
+                                        loginButton.setEnabled(true); // Habilita el botón nuevamente
+                                    }
+                                });
+                            } else {
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        JOptionPane.showMessageDialog(LogIn.this, "Error: No se pudo establecer la conexión a la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+                                        loginButton.setEnabled(true); // Habilita el botón nuevamente
+                                    }
+                                });
+                            }
+                        } catch (SQLException ex) {
+                            Logger.getLogger(LogIn.class.getName()).log(Level.SEVERE, null, ex);
+                            loginButton.setEnabled(true); // Habilita el botón en caso de excepción
+                        }
+                    }
+                });
+                connectionThread.start();
+            }  
         });
+
 
         JButton registerButton = new JButton("¿No tienes cuenta? Regístrate");
         registerButton.setHorizontalAlignment(SwingConstants.LEFT);
@@ -229,12 +272,12 @@ public class LogIn extends JFrame {
 
         try {
             String query = "SELECT idUser FROM UserProfile WHERE username = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
+            PreparedStatement statement = conection.prepareStatement(query);
             statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                userId = resultSet.getInt("id");
+                userId = resultSet.getInt("idUser");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al recuperar el ID de usuario");
