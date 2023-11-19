@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Settings extends JFrame {
+
     public Settings() {
         initializeUI();
     }
@@ -105,7 +106,9 @@ public class Settings extends JFrame {
         optionsPanel.add(createButton(" Cambiar contraseña", "/images/drawable-indication/lock.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(Settings.this, "Acción del Botón 3");
+                // Mostrar la ventana emergente para cambiar la contraseña
+                ChangePasswordDialog dialog = new ChangePasswordDialog(Settings.this);
+                dialog.setVisible(true);
             }
         }));
         optionsPanel.add(createSeparator());
