@@ -33,7 +33,7 @@ public class Register extends JFrame {
 
         int screenWidth = mode.getWidth();
         int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight);
+        int smallerDimension = Math.min(screenWidth, screenHeight - 42);
 
         int newWidth = smallerDimension * 520 / 980;
         int newHeight = smallerDimension;
@@ -108,10 +108,23 @@ public class Register extends JFrame {
         constraints.gridwidth = 1;
         registroPanel.add(nameField, constraints);
 
+        ImageIcon lastNameIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/drawable-indication/users.png"))
+                .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+        JLabel lastNameLabel = new JLabel(lastNameIcon);
+        constraints.gridy = 4;
+        constraints.gridx = 0;
+        constraints.gridwidth = 1;
+        registroPanel.add(lastNameLabel, constraints);
+
+        PlaceholderTextField lastNameField = createTextField("Apellidos");
+        constraints.gridx = 1;
+        constraints.gridwidth = 1;
+        registroPanel.add(lastNameField, constraints);
+
         ImageIcon phoneNumberIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/drawable-indication/phone.png"))
                 .getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
         JLabel phoneNumberLabel = new JLabel(phoneNumberIcon);
-        constraints.gridy = 4;
+        constraints.gridy = 5;
         constraints.gridx = 0;
         constraints.gridwidth = 1;
         
@@ -147,7 +160,7 @@ public class Register extends JFrame {
         PlaceholderTextField phoneNumberField = createTextField("Numero de teléfono");
         phoneNumberPanel.add(phoneNumberField, panelConstraints);
         constraints.gridx = 0;
-        constraints.gridy = 4;
+        constraints.gridy = 5;
         constraints.gridwidth = 2;
         registroPanel.add(phoneNumberPanel, constraints);
         /////////////////////////////////////////////////

@@ -43,7 +43,7 @@ public class ContactProfile extends JFrame {
 
         int screenWidth = mode.getWidth();
         int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight);
+        int smallerDimension = Math.min(screenWidth, screenHeight - 42);
 
         int newWidth = smallerDimension * 520 / 980;
         int newHeight = smallerDimension;
@@ -111,7 +111,7 @@ public class ContactProfile extends JFrame {
             }
         });
 
-        JButton trashButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-action/trash-2.png")));
+        JButton trashButton = new JButton(new ImageIcon(getClass().getResource("/images/drawable-action/trash.png")));
         trashButton.setPreferredSize(new Dimension(60, 60));
         trashButton.setOpaque(true);
         trashButton.setFocusable(false);

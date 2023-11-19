@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class CConexion {
-    public static Connection conection = null;
+    public static Connection connection = null;
     String usuario = "root";
     String contrasena = "Ragnar2105";
     String bd = "rippledb";
@@ -18,11 +18,11 @@ public class CConexion {
 
     public Connection establecerConection() throws SQLException {
         try {
-            conection = (Connection) DriverManager.getConnection(cadena, usuario, contrasena);
+            connection = (Connection) DriverManager.getConnection(cadena, usuario, contrasena);
         } catch (SQLException e) {
             throw e;
         }
-        return conection;
+        return connection;
     }
     public int getUserId() {
         return userId;

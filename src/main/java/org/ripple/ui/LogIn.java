@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import static org.ripple.connection.CConexion.conection;
+import static org.ripple.connection.CConexion.connection;
 
 public class LogIn extends JFrame {
 
@@ -39,7 +39,7 @@ public class LogIn extends JFrame {
 
         int screenWidth = mode.getWidth();
         int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight);
+        int smallerDimension = Math.min(screenWidth, screenHeight - 42);
 
         int newWidth = smallerDimension * 520 / 980;
         int newHeight = smallerDimension;
@@ -228,8 +228,8 @@ public class LogIn extends JFrame {
         int userId = -1;
 
         try {
-            String query = "SELECT id FROM Users WHERE username = ?";
-            PreparedStatement statement = conection.prepareStatement(query);
+            String query = "SELECT idUser FROM UserProfile WHERE username = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
 

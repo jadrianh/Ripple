@@ -22,6 +22,7 @@ public class AddContact extends JFrame {
     private JPanel phoneNumbersPanel;
     private JPanel socialMediaPanel;
     private Process process;
+    private static final int MAX_PHONE_NUMBER_PANELS = 2;
 
     public AddContact(){
         initializeUI();
@@ -57,8 +58,7 @@ public class AddContact extends JFrame {
 
         int screenWidth = mode.getWidth();
         int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight);
-
+        int smallerDimension = Math.min(screenWidth, screenHeight - 42);
         int newWidth = smallerDimension * 520 / 980;
         int newHeight = smallerDimension;
 
@@ -236,12 +236,21 @@ public class AddContact extends JFrame {
         // Crea el birthDayField
         JTextField birthDayField = new JTextField("DD");
         birthDayField.setMaximumSize(new Dimension(70, 25));
+        birthDayField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.LIGHT_GRAY));
+        birthDayField.setFont( new Font("Verdana", Font.PLAIN, 16));
 
         // Crea el birthDayMonthCB
-        JComboBox birthDayMonthCB = new JComboBox<>(new String[]{"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"});
+        JComboBox<String> birthDayMonthCB = new JComboBox<>(new String[]{"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"});
         birthDayMonthCB.setMaximumSize(new Dimension(160, 25));
         birthDayMonthCB.setBackground(Color.WHITE);
-        birthDayMonthCB.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        birthDayMonthCB.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.LIGHT_GRAY));
+        birthDayMonthCB.setFont( new Font("Verdana", Font.PLAIN, 15));
+
+        // Personaliza el botón de la flecha
+        JButton arrowButton = ((JButton) birthDayMonthCB.getComponent(0));
+        arrowButton.setBackground(Color.WHITE);
+        arrowButton.setBorder(BorderFactory.createEmptyBorder()); // Elimina el borde del botón de la flecha
+
         birthDayMonthCB.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         birthDayMonthCB.setUI(new BasicComboBoxUI() {
@@ -256,34 +265,37 @@ public class AddContact extends JFrame {
         // Crea el birthYearField
         JTextField birthYearField = new JTextField("YYYY");
         birthYearField.setMaximumSize(new Dimension(120, 25));
+        birthYearField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.LIGHT_GRAY));
+        birthYearField.setFont(new Font("Verdana", Font.PLAIN, 16));
 
         birthDayPanel.add(birthDayField);
         birthDayPanel.add(birthDayMonthCB);
         birthDayPanel.add(birthYearField);
 
-        // Crea el notesLabel
-        JLabel notesLabel = new JLabel("Notas:");
-        notesLabel.setFont(CustomFontManager.getCustomFontMedium(20, false));
-        notesLabel.setHorizontalAlignment(JLabel.LEFT);
+        // Crea el addressLabel
+        JLabel addressLabel = new JLabel("Direccion:");
+        addressLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
+        addressLabel.setHorizontalAlignment(JLabel.LEFT);
 
-        // Crea el notesTextArea
-        JTextArea notesTextArea = new JTextArea();
-        notesTextArea.setMaximumSize(new Dimension(350, 92));
-        notesTextArea.setFont(CustomFontManager.getCustomFont(16, false));
-        notesTextArea.setLineWrap(true);
-        notesTextArea.setWrapStyleWord(true);
+        // Crea el addressTextArea
+        JTextArea addressTextArea = new JTextArea();
+        addressTextArea.setMaximumSize(new Dimension(350, 92));
+        addressTextArea.setFont(new Font("Verdana", Font.PLAIN, 15));
+        addressTextArea.setLineWrap(true);
+        addressTextArea.setWrapStyleWord(true);
 
         // Crear un borde gris claro
         Border border = BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         );
-        notesTextArea.setBorder(border);
+        addressTextArea.setBorder(border);
 
         //---------------Configuracion del panel de número de teléfono---------------//
         // Configura el panel que contiene los componentes de los números de teléfono.
         JPanel phoneNumbersPanel = createPhoneNumbersPanel();
-        CustomScrollPane phonesScrollPane = new CustomScrollPane(phoneNumbersPanel, 375, 150);
+        CustomScrollPane phonesScrollPane = new CustomScrollPane(phoneNumbersPanel, 375, 120);
+        phonesScrollPane.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.LIGHT_GRAY));
 
         //---------------Configuracion del panel de redes sociales---------------//
         // Configura el panel que contiene los componentes de las redes sociales.
@@ -299,8 +311,8 @@ public class AddContact extends JFrame {
         addContactPanel.add(companyField);
         addContactPanel.add(birthDayLabel);
         addContactPanel.add(birthDayPanel);
-        addContactPanel.add(notesLabel);
-        addContactPanel.add(notesTextArea);
+        addContactPanel.add(addressLabel);
+        addContactPanel.add(addressTextArea);
         addContactPanel.add(phonesScrollPane);
         addContactPanel.add(socialMediaScrollPane);
 
@@ -312,6 +324,14 @@ public class AddContact extends JFrame {
 
         getContentPane().add(mainPanel);
         setVisible(true);
+    }
+
+    protected void paintBorder(Graphics g) {
+        // Establece el color del borde que deseas
+        g.setColor(Color.LIGHT_GRAY);
+
+        // Pinta el borde utilizando los límites del componente
+        g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
     }
 
     //---------------Método createPhoneNumbersPanel()---------------//

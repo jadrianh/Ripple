@@ -1,19 +1,12 @@
 package org.ripple;
 
-import org.ripple.connection.CConexion;
-import org.ripple.ui.LogIn;
+import org.ripple.test.contactProfile;
+import org.ripple.util.ChangePasswordDialog;
 
 import javax.swing.*;
-import java.sql.SQLException;
+
 public class Main {
     public static void main(String[] args) {
-        LogIn login = new LogIn();
-
-        CConexion conexion = new CConexion();
-        try {
-            conexion.establecerConection();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al conectar a la Base de Datos");
-        }
+        contactProfile con = new contactProfile();
     }
 }

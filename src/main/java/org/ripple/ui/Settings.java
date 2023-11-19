@@ -122,7 +122,7 @@ public class Settings extends JFrame {
         }));
         optionsPanel.add(createSeparator());
 
-        optionsPanel.add(createButton(" Eliminar Cuenta", "/images/drawable-action/trash-2.png", new ActionListener() {
+        optionsPanel.add(createButton(" Eliminar Cuenta", "/images/drawable-action/trash.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Crear una instancia del cuadro de diálogo personalizado

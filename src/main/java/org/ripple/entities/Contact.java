@@ -11,6 +11,7 @@ public class Contact {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private String company;
     private BufferedImage profileImage;
 
     private static final List<String> IMAGE_PATHS = List.of(

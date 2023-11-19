@@ -1,7 +1,6 @@
 package org.ripple.ui;
 
 import desplazable.Desface;
-import org.ripple.test.GestionContactos;
 import org.ripple.util.CircularButton;
 import org.ripple.util.SideMenu;
 
@@ -35,7 +34,7 @@ public class Tags extends JFrame {
 
         int screenWidth = mode.getWidth();
         int screenHeight = mode.getHeight();
-        int smallerDimension = Math.min(screenWidth, screenHeight);
+        int smallerDimension = Math.min(screenWidth, screenHeight - 42);
 
         int newWidth = smallerDimension * 520 / 980;
         int newHeight = smallerDimension;
@@ -90,7 +89,6 @@ public class Tags extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     dispose();
-                    GestionContactos.main(new String[0]);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
