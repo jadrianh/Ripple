@@ -1,17 +1,18 @@
 package org.ripple.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.ripple.ui.addedit.ContactViewModel
 import org.ripple.ui.home.HomeViewModel
+import org.ripple.ui.home.HomeScreen
+import org.ripple.ui.profile.ContactProfileScreen
+import org.ripple.ui.addedit.AddEditContactScreen
+import org.ripple.ui.settings.SettingsScreen
 
 sealed class RippleRoute(val route: String) {
     data object Home : RippleRoute("home")
@@ -103,42 +104,3 @@ fun AppNavigation(
         }
     }
 }
-
-@Composable
-fun HomeScreen(
-    viewModel: HomeViewModel,
-    onContactClick: (Int) -> Unit,
-    onAddContact: () -> Unit,
-    onOpenSettings: () -> Unit
-) {
-    Box(Modifier.fillMaxSize())
-}
-
-@Composable
-fun ContactProfileScreen(
-    contactId: Int,
-    viewModel: ContactViewModel,
-    onBack: () -> Unit,
-    onEdit: () -> Unit,
-    onDeleted: () -> Unit
-) {
-    Box(Modifier.fillMaxSize())
-}
-
-@Composable
-fun AddEditContactScreen(
-    contactId: Int?,
-    viewModel: ContactViewModel,
-    onCancel: () -> Unit,
-    onSaved: (Int) -> Unit
-) {
-    Box(Modifier.fillMaxSize())
-}
-
-@Composable
-fun SettingsScreen(
-    onBack: () -> Unit
-) {
-    Box(Modifier.fillMaxSize())
-}
-
