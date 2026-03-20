@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+import org.ripple.data.tags.TagModel
+import org.ripple.data.tags.createTagModel
 import org.ripple.ui.theme.RippleDark
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,12 +32,27 @@ fun TagsScreen(
     viewModel: TagsViewModel = viewModel()
 ) {
     val tags by viewModel.tags.collectAsState()
+    val pinnedTags by viewModel.pinnedTags.collectAsState()
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    
     var showAddDialog by remember { mutableStateOf(false) }
     var tagToDelete by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is TagsUiEvent.MaxPinnedReached -> {
+                    snackbarHostState.showSnackbar("Máximo 6 etiquetas activas")
+                }
+            }
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Etiquetas") },
@@ -77,6 +96,8 @@ fun TagsScreen(
                     items(tags) { tag ->
                         TagRow(
                             tag = tag,
+                            isPinned = pinnedTags.contains(tag.name),
+                            onTogglePin = { viewModel.togglePin(tag.name) },
                             onDelete = {
                                 tagToDelete = tag.name
                                 scope.launch {
@@ -132,15 +153,28 @@ fun TagsScreen(
 }
 
 @Composable
-private fun TagRow(tag: TagModel, onDelete: () -> Unit) {
+private fun TagRow(
+    tag: TagModel,
+    isPinned: Boolean,
+    onTogglePin: () -> Unit,
+    onDelete: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        IconButton(onClick = onTogglePin) {
+            Icon(
+                imageVector = if (isPinned) Icons.Default.Star else Icons.Outlined.StarOutline,
+                contentDescription = if (isPinned) "Desactivar" else "Activar",
+                tint = if (isPinned) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = tag.color.copy(alpha = 0.6f)
@@ -153,6 +187,9 @@ private fun TagRow(tag: TagModel, onDelete: () -> Unit) {
                 fontWeight = FontWeight.Medium
             )
         }
+        
+        Spacer(modifier = Modifier.weight(1f))
+
         IconButton(onClick = onDelete) {
             Icon(Icons.Default.Close, contentDescription = "Eliminar", tint = Color.Gray)
         }
@@ -160,7 +197,7 @@ private fun TagRow(tag: TagModel, onDelete: () -> Unit) {
 }
 
 @Composable
-private fun AddTagDialog(
+fun AddTagDialog(
     existingTags: List<String>,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
