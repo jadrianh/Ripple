@@ -35,52 +35,59 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onContactClick: (Int) -> Unit,
     onAddContact: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenTags: () -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.width(260.dp),
-                drawerContainerColor = MaterialTheme.colorScheme.surface,
-                drawerShape = RoundedCornerShape(0.dp)
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text(
-                        text = "Ripple",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = RippleAccent
-                    )
-                    Text(
-                        text = "Tu agenda personal",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                DrawerItem(Icons.Default.Label, "Etiquetas") {
-                    scope.launch { drawerState.close() }
-                }
-                DrawerItem(Icons.Default.Settings, "Ajustes") {
-                    scope.launch { drawerState.close() }
-                    onOpenSettings()
+    // Move gradient and insets OUTSIDE the drawer
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(RippleGradientBrush)
+            .windowInsetsPadding(WindowInsets.systemBars)
+    ) {
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            gesturesEnabled = true,
+            drawerContent = {
+                ModalDrawerSheet(
+                    modifier = Modifier
+                        .width(260.dp)
+                        .statusBarsPadding(),
+                    drawerContainerColor = MaterialTheme.colorScheme.surface,
+                    drawerShape = RoundedCornerShape(0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(
+                            text = "Ripple",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = RippleAccent
+                        )
+                        Text(
+                            text = "Tu agenda personal",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    DrawerItem(Icons.Default.Label, "Etiquetas") {
+                        scope.launch { drawerState.close() }
+                        onOpenTags()
+                    }
+                    DrawerItem(Icons.Default.Settings, "Ajustes") {
+                        scope.launch { drawerState.close() }
+                        onOpenSettings()
+                    }
                 }
             }
-        }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(RippleGradientBrush)
-                .windowInsetsPadding(WindowInsets.systemBars)
         ) {
+            // Main Content Area
             Column(modifier = Modifier.fillMaxSize()) {
                 // TOP BAR
                 HomeTopBar(
@@ -88,8 +95,9 @@ fun HomeScreen(
                     onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
 
-                // TAG FILTER
-                val tags = listOf("Todos", "Amigos", "Familia", "Trabajo", "Otro")
+                // TAG FILTER - Dynamic from pinned tags
+                val pinnedTags by viewModel.pinnedTags.collectAsState()
+                val tags = listOf("Todos") + pinnedTags
                 var selectedTag by remember { mutableStateOf("Todos") }
 
                 LazyRow(
@@ -206,7 +214,7 @@ private fun HomeTopBar(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                
+
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (searchQuery.isEmpty()) {
                         Text("Buscar contacto...", color = RippleGray, fontSize = 14.sp)

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import org.ripple.data.ContactRepository
 import org.ripple.data.local.ContactWithDetails
 import org.ripple.data.local.RippleDatabase
+import org.ripple.data.tags.TagsRepository
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -35,6 +36,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 initialValue = emptyList()
             )
 
+    val pinnedTags: StateFlow<List<String>> =
+        TagsRepository.getPinnedTagsFlow(application.applicationContext)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
     init {
         val dao = RippleDatabase.getInstance(application).contactDao()
         repository = ContactRepository(dao)
@@ -44,4 +53,3 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         searchQuery.value = query
     }
 }
-
