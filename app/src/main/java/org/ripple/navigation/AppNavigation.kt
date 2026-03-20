@@ -13,6 +13,7 @@ import org.ripple.ui.home.HomeScreen
 import org.ripple.ui.profile.ContactProfileScreen
 import org.ripple.ui.addedit.AddEditContactScreen
 import org.ripple.ui.settings.SettingsScreen
+import org.ripple.ui.tags.TagsScreen
 
 sealed class RippleRoute(val route: String) {
     data object Home : RippleRoute("home")
@@ -30,6 +31,8 @@ sealed class RippleRoute(val route: String) {
     }
 
     data object Settings : RippleRoute("settings")
+    
+    data object Tags : RippleRoute("tags")
 }
 
 @Composable
@@ -46,7 +49,8 @@ fun AppNavigation(
                 viewModel = homeViewModel,
                 onContactClick = { id -> navController.navigate(RippleRoute.ContactProfile.createRoute(id)) },
                 onAddContact = { navController.navigate(RippleRoute.AddContact.route) },
-                onOpenSettings = { navController.navigate(RippleRoute.Settings.route) }
+                onOpenSettings = { navController.navigate(RippleRoute.Settings.route) },
+                onOpenTags = { navController.navigate(RippleRoute.Tags.route) }
             )
         }
 
@@ -101,6 +105,10 @@ fun AppNavigation(
 
         composable(route = RippleRoute.Settings.route) {
             SettingsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(route = RippleRoute.Tags.route) {
+            TagsScreen(onBack = { navController.popBackStack() })
         }
     }
 }
