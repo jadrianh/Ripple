@@ -30,6 +30,7 @@ import org.ripple.ui.theme.RippleDark
 import org.ripple.ui.theme.RippleGradientBrush
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.alpha
+import org.ripple.data.tags.createTagModel
 
 private val avatarColors = listOf(
     Color(0xFF378ADD), Color(0xFF1D9E75), Color(0xFFD85A30),
@@ -50,15 +51,6 @@ fun ContactProfileScreen(
 
     LaunchedEffect(contactId) {
         viewModel.loadContact(contactId)
-    }
-
-    // Effect to handle navigation after deletion
-    LaunchedEffect(uiState) {
-        if (uiState is ContactUiState.Success && (uiState as ContactUiState.Success).contact == null && contactId != 0) {
-            // This is a bit tricky since contactId 0 is default, 
-            // but if we were loading a contact, and now it's null, it was probably deleted.
-            // However, the VM sets selectedContactId to null on delete.
-        }
     }
 
     Box(
@@ -245,10 +237,10 @@ private fun ProfileContent(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp),
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Text("Información de contacto", fontWeight = FontWeight.Bold, color = RippleDark, fontSize = 16.sp)
+                Text("Información de contacto", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Phone Numbers
@@ -274,7 +266,7 @@ private fun ProfileContent(
                 // Social Networks Chips
                 if (contact.socialNetworks.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Redes Sociales", fontWeight = FontWeight.SemiBold, color = RippleDark, fontSize = 14.sp)
+                    Text("Redes Sociales", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -289,28 +281,31 @@ private fun ProfileContent(
                 // Notes
                 if (!contact.contact.notes.isNullOrBlank()) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("Notas", fontWeight = FontWeight.SemiBold, color = RippleDark, fontSize = 14.sp)
+                    Text("Notas", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(contact.contact.notes, color = Color.Gray, fontSize = 14.sp)
+                    Text(contact.contact.notes, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                 }
 
                 // Tags
-                if (!contact.contact.tags.isNullOrBlank()) {
+                val tagList = contact.contact.tags?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
+                if (tagList.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    val tags = contact.contact.tags.split(",")
+                    Text("Etiquetas", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        tags.forEach { tag ->
+                        tagList.forEach { tagName ->
+                            val tag = createTagModel(tagName)
                             Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = RippleAccent.copy(alpha = 0.1f)
+                                shape = RoundedCornerShape(16.dp),
+                                color = tag.color.copy(alpha = 0.6f)
                             ) {
                                 Text(
-                                    text = tag.trim(),
+                                    text = tag.name,
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                    color = RippleAccent,
+                                    color = RippleDark,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -346,8 +341,8 @@ private fun InfoRow(icon: ImageVector, value: String, label: String) {
         Icon(icon, contentDescription = null, tint = RippleAccent, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(value, fontSize = 15.sp, color = RippleDark, fontWeight = FontWeight.Medium)
-            Text(label, fontSize = 12.sp, color = Color.Gray)
+            Text(value, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
+            Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -356,8 +351,8 @@ private fun InfoRow(icon: ImageVector, value: String, label: String) {
 private fun SocialChip(network: String, username: String) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = Color(0xFFF5F5F5),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0E0E0))
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -372,7 +367,7 @@ private fun SocialChip(network: String, username: String) {
             Text(
                 text = username,
                 fontSize = 12.sp,
-                color = RippleDark
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-private val Context.rippleDataStore by preferencesDataStore(name = "ripple_prefs")
+internal val Context.rippleDataStore by preferencesDataStore(name = "ripple_prefs")
 
 private object RipplePrefsKeys {
     val DarkThemeEnabled: Preferences.Key<Boolean> = booleanPreferencesKey("dark_theme_enabled")
@@ -65,4 +65,3 @@ fun RippleTheme(
         content = content
     )
 }
-
